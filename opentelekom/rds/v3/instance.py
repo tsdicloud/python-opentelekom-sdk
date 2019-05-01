@@ -18,7 +18,7 @@ from openstack import utils
 from opentelekom import otc_resource
 
 
-class DB(otc_resource.OtcResource):
+class DB(otc_resource.OtcResource, otc_resource.TagMixin):
     resources_key = "instances"
     resource_key = "instance" # top structure 
     base_path = "/instances"

@@ -70,6 +70,28 @@ class BaseFunctionalTest(base.BaseFunctionalTest):
         self.reuse = True
         self.destroy = False
 
+    def _checkTags(self, proxy, resource, prefix, component):
+        tag1 = "_ENV"
+        tag2 = "_COMPONENT"
+
+        proxy.add_tag(resource, tag1, prefix)
+        res = proxy.fetch_tags(resource)
+        self.assertEqual( res.tags[tag1], prefix )
+
+        proxy.remove_tag(resource, tag1)
+        res = proxy.fetch_tags(resource)
+        self.assertFalse(res.tags)
+
+        proxy.set_tags(resource, tags={ tag1: prefix+'-x', tag2: component })
+        res = proxy.fetch_tags(resource)
+        self.assertGreater(len(res.tags), 1)
+        self.assertEqual( res.tags[tag1], prefix + '-x')
+        self.assertEqual( res.tags[tag2], component )
+        proxy.remove_all_tags(resource)
+        res = proxy.fetch_tags(resource)
+        self.assertFalse(res.tags)
+
+
     def tearDown(self):
         super().tearDown()
 

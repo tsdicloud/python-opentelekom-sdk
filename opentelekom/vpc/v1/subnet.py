@@ -16,7 +16,7 @@ from openstack import resource
 from opentelekom import otc_resource
 
 
-class Subnet(resource.Resource):
+class Subnet(resource.Resource, otc_resource.TagMixin):
     resources_key = "subnets"
     resource_key = "subnet" # top structure is a dict for subnet
     base_path = "/subnets"
@@ -29,6 +29,10 @@ class Subnet(resource.Resource):
     allow_delete = False  # see below
 
     create_method = 'POST'
+
+    _query_mapping = resource.QueryParameters(
+        **resource.TagMixin._tag_query_parameters
+    )
 
     # required for update
     parent_vpc_id = resource.URI("parent_vpc_id")

@@ -16,11 +16,14 @@ from openstack import resource
 from opentelekom import otc_resource
 
 
-class Queue(otc_resource.OtcResource):
+class Queue(otc_resource.OtcResource, otc_resource.TagMixin):
     resources_key = "queues"
     base_path = "/queues"
 
-    _query_mapping = resource.QueryParameters("include_deadletter", "include_messages_num")
+    _query_mapping = resource.QueryParameters("include_deadletter", 
+        "include_messages_num",
+        **resource.TagMixin._tag_query_parameters
+    )
     # FIXME: Get does only have one query parameter
     #_query_mapping = resource.QueryParameters("include_deadletter")
 

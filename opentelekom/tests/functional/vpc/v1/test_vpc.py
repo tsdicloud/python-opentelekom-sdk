@@ -18,35 +18,34 @@ from opentelekom.tests.functional import base
 from opentelekom.vpc.vpc_service import VpcService
 
 
+from opentelekom.tests.functional.vpc.v1 import fixture_vpc
+
 class TestVpc(base.BaseFunctionalTest):
 
     def setUp(self):
         super().setUp()
-        self.user_cloud.add_service(VpcService("vpc"))
 
-        self.VPC_NAME = "rbe-vpc-sdktest1"
-        self.vpc = self.user_cloud.vpc.create_vpc(
-            name=self.VPC_NAME,
-            cidr="10.255.0.0/16")
+        self.prefix = "rbe-sdktest-vpc"
 
-    def test_vpc_found(self):
+        self.vpcFixture = self.useFixture(fixture_vpc.VpcFixture(self.user_cloud))
+        self.vpcFixture.createTestVpc(self.prefix)    
+
+    def test_vpc_found_update(self):
         vpcs = list(self.user_cloud.vpc.vpcs())
         self.assertGreater(len(vpcs), 0)
         #import pdb; pdb.set_trace()
-        vpcfound = list(filter(lambda x: x['name'] == self.VPC_NAME, vpcs ))
+        vpcfound = list(filter(lambda x: x['name'] == self.prefix + "-vpc", vpcs ))
         self.assertEqual(len(vpcfound), 1)
-        
+   
+        self._checkTags(self.user_cloud.vpc2, self.vpcFixture.vpc,
+            prefix=self.prefix, component="vpc")
 
-    def test_vpc_update(self):
-        self.user_cloud.vpc.update_vpc(self.vpc.id, enable_shared_snat=True)
-
-        found_vpc = self.user_cloud.vpc.get_vpc(self.vpc.id)
+        self.user_cloud.vpc.update_vpc(self.vpcFixture.vpc.id, enable_shared_snat=True)
+        found_vpc = self.user_cloud.vpc.get_vpc(self.vpcFixture.vpc.id)
         self.assertFalse(found_vpc is None)
-        self.assertEqual(found_vpc.id, self.vpc.id)
+        self.assertEqual(found_vpc.id, self.vpcFixture.vpc.id)
         self.assertEqual(found_vpc.enable_shared_snat, True)
 
 
     def tearDown(self):
         super().tearDown()
-        if self.vpc is not None:
-            self.user_cloud.vpc.delete_vpc(self.vpc.id)

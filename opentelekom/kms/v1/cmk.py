@@ -19,10 +19,14 @@ from openstack import exceptions
 from openstack import resource
 from opentelekom import otc_resource
 
-class CustomerMasterKey(otc_resource.OtcResource):
+class CustomerMasterKey(otc_resource.OtcResource, otc_resource.TagMixin):
     resources_key = "key_details"
     resource_key = "key_info"
     base_path = "/kms/create-key"
+
+    _query_mapping = resource.QueryParameters(
+        **resource.TagMixin._tag_query_parameters
+    )
 
     # capabilities
     allow_create = True

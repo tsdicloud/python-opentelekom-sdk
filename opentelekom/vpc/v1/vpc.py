@@ -15,7 +15,7 @@ import uuid
 from openstack import resource
 from opentelekom import otc_resource
 
-class Vpc(resource.Resource):
+class Vpc(resource.Resource, otc_resource.TagMixin):
     resources_key = "vpcs"
     resource_key = "vpc" # top structure is a dict for vpc
     base_path = "/vpcs"
@@ -29,7 +29,13 @@ class Vpc(resource.Resource):
 
     create_method = 'POST'
 
+    _query_mapping = resource.QueryParameters(
+        **resource.TagMixin._tag_query_parameters
+    )
+
+
     # Properties
+    #---- create
     #: name: Name of the vpc. The name is the unique identity of a queue. It
     #: must not exceed 64 bytes in length, and it is limited to US-ASCII
     #: letters, digits, underscores, and hyphens.
@@ -38,3 +44,8 @@ class Vpc(resource.Resource):
     cidr = resource.Body("cidr")
     #: enable_shared_snat: Switch to enable shared SNAT
     enable_shared_snat = resource.Body("enable_shared_snat", type=bool)
+    #---- get/list
+    #: status: the vpc status
+    status = resource.Body("status")
+    #: routes: a list of VPC routes
+    routes = resource.Body("routes", type=list)

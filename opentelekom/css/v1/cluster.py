@@ -15,7 +15,7 @@ import uuid
 from openstack import resource
 from opentelekom import otc_resource
 
-class Cluster(otc_resource.OtcResource):
+class Cluster(otc_resource.OtcResource, otc_resource.TagMixin):
     resources_key = "clusters"
     resource_key = "cluster"
     base_path = "/clusters"
@@ -28,6 +28,10 @@ class Cluster(otc_resource.OtcResource):
     allow_delete = True
 
     create_method = 'POST'
+
+    _query_mapping = resource.QueryParameters(
+        **resource.TagMixin._tag_query_parameters
+    )
 
     # Properties
     #: name: Name of the vpc. The name is the unique identity of a queue. It

@@ -62,6 +62,7 @@ class Proxy(otc_proxy.OtcProxy):
         :returns: The results of db creation
         :rtype: :class:`~opentelekom.rds.v3.instance.DB`
         """
+        
         return self._create(_db.DB, **attrs)
 
     def update_db(self, db, **attrs):

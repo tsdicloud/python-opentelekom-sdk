@@ -14,59 +14,44 @@ import six
 
 from openstack import exceptions
 from opentelekom.tests.functional import base
+from opentelekom.tests.functional.vpc.v1 import fixture_vpc
 
-from opentelekom.vpc.vpc_service import VpcService
+class TestNatGateway(base.BaseFunctionalTest):
 
+    def setUp(self):
+        super().setUp()
 
 class TestSubnet(base.BaseFunctionalTest):
 
     def setUp(self):
         super().setUp()
-        self.user_cloud.add_service(VpcService("vpc"))
-        self.VPC_NAME = "rbe-vpc-sdktest4"
-        self.SN1_NAME = "rbe-sn-sdktest4-1"
-        self.SN2_NAME = "rbe-sn-sdktest4-2"
-        self.vpc = self.user_cloud.vpc.create_vpc(
-            name=self.VPC_NAME,
-            cidr="10.250.0.0/16")
-        self.sn1 = self.user_cloud.vpc.create_subnet(
-            vpc=self.vpc,
-            name=self.SN1_NAME,
-            cidr="10.250.0.0/21",
-            gateway_ip="10.250.0.1",
-            dhcp_enable=False
-            )
-        self.sn2 = self.user_cloud.vpc.create_subnet(
-            vpc=self.vpc,
-            name=self.SN2_NAME,
-            cidr="10.250.128.0/21",
-            gateway_ip="10.250.128.7",
-            availability_zone="eu-de-02",
-            dnsList=["4.4.4.4", "5.5.5.5", "6.6.6.6"]
-            )
-        # it takes some time for the subnet to become active
-        # but onl active subnets are assigned to vpcs
-        self.user_cloud.vpc.wait_for_status(self.sn1)
-        self.user_cloud.vpc.wait_for_status(self.sn2)
+
+        self.prefix = "rbe-sdktest-subnet"
+
+        self.vpcFixture = self.useFixture(fixture_vpc.VpcFixture(self.user_cloud))
+        self.vpcFixture.createTestSubnet1(self.prefix)
+        self.vpcFixture.addTestSubnet2(self.prefix)
 
     def test_subnet_found_and_updated(self):
         subnets = list(self.user_cloud.vpc.subnets())
         self.assertGreater(len(subnets), 0)
-        snfound = list(filter(lambda x: x['name'] == self.SN1_NAME or x['name'] == self.SN2_NAME, subnets ))
+        sn1_name = self.prefix +"-sn1"
+        sn2_name = self.prefix +"-sn2"
+        snfound = list(filter(lambda x: x['name'] == sn1_name or x['name'] == sn2_name, subnets ))
         self.assertEqual(len(snfound), 2)
     
         #remember that name is mandatory on update
-        self.user_cloud.vpc.update_subnet(self.sn1, name=self.sn1.name, primary_dns="4.4.4.4", secondary_dns="5.5.5.5")
+        self.user_cloud.vpc.update_subnet(self.vpcFixture.sn1, name=self.sn1.name, primary_dns="4.4.4.4", secondary_dns="5.5.5.5")
 
-        found_sn1 = self.user_cloud.vpc.get_subnet(self.sn1.id)
+        found_sn1 = self.user_cloud.vpc.get_subnet(self.vpcFixture.sn1.id)
         self.assertFalse(found_sn1 is None)
-        self.assertEqual(found_sn1.id, self.sn1.id)
+        self.assertEqual(found_sn1.id, self.vpcFixture.sn1.id)
         self.assertEqual(found_sn1.primary_dns, "4.4.4.4")
         self.assertEqual(found_sn1.secondary_dns, "5.5.5.5")
 
         opts = [ { "opt_name": "ntp", "opt_value": "10.100.0.33,10.100.0.34" } ]
-        new_name = self.sn2.name + "-x"
-        self.user_cloud.vpc.update_subnet(self.sn2, name=new_name, extra_dhcp_opts=opts)
+        new_name = self.prefix + "-snx"
+        self.user_cloud.vpc.update_subnet(self.vpcFixture.sn2, name=new_name, extra_dhcp_opts=opts)
 
         found_sn2 = self.user_cloud.vpc.get_subnet(self.sn2.id)
         self.assertFalse(found_sn2 is None)
@@ -77,14 +62,5 @@ class TestSubnet(base.BaseFunctionalTest):
         self.assertEqual(found_sn2.extra_dhcp_opts[0]['opt_name'], "ntp")
         self.assertEqual(found_sn2.extra_dhcp_opts[0]['opt_value'], "10.100.0.33,10.100.0.34")
 
-
     def tearDown(self):
         super().tearDown()
-        if self.sn2 is not None:
-            self.user_cloud.vpc.delete_subnet(subnet=self.sn2.id)
-            self.user_cloud.vpc.wait_for_delete(self.sn2)
-        if self.sn1 is not None:
-            result=self.user_cloud.vpc.delete_subnet(subnet=self.sn1)
-            self.user_cloud.vpc.wait_for_delete(result) # testing also the chained API calls
-        if self.vpc is not None:
-            self.user_cloud.vpc.delete_vpc(self.vpc.id)

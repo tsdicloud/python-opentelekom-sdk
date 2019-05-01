@@ -16,7 +16,7 @@ from openstack import utils
 from opentelekom import otc_resource
 
 
-class Service(otc_resource.OtcResource):
+class Service(otc_resource.OtcResource, otc_resource.TagMixin):
     resources_key = "nat_gateways"
     resource_key = "nat_gateway"
     base_path = "/nat_gateways"
@@ -43,7 +43,7 @@ class Service(otc_resource.OtcResource):
         "created_at",
         vpc_id="router_id",
         subnet_id="internal_network_id",
-         **resource.TagMixin._tag_query_parameters
+        **resource.TagMixin._tag_query_parameters
     )
 
     # Properties
