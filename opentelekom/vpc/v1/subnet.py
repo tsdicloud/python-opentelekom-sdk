@@ -16,7 +16,7 @@ from openstack import resource
 from opentelekom import otc_resource
 
 
-class Subnet(resource.Resource, otc_resource.TagMixin):
+class Subnet(otc_resource.OtcResource, otc_resource.TagMixin):
     resources_key = "subnets"
     resource_key = "subnet" # top structure is a dict for subnet
     base_path = "/subnets"

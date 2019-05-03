@@ -55,6 +55,23 @@ class Proxy(otc_proxy.OtcProxy):
         """
         return self._get(_vpc.Vpc, vpc)
 
+    def find_vpc(self, name_or_id, ignore_missing=True, **args):
+        """ind IP availability of a network
+
+        :param name_or_id: The name or ID of a vpc
+        :param bool ignore_missing: When set to ``False``
+                    :class:`~openstack.exceptions.ResourceNotFound` will be
+                    raised when the resource does not exist.
+                    When set to ``True``, None will be returned when
+                    attempting to find a nonexistent resource.
+        :param dict args: Any additional parameters to be passed into
+                          underlying methods. such as query filters.
+        :returns: One :class:`~openstack.network.v2.network_ip_availability.
+                       NetworkIPAvailability` or None
+        """
+        return self._find(_vpc.Vpc, name_or_id, ignore_missing=ignore_missing, **args)
+
+
     def vpcs(self, **query):
         """Retrieve a ist of vpcs
 
@@ -129,6 +146,23 @@ class Proxy(otc_proxy.OtcProxy):
             queue matching the name could be found.
         """
         return self._get(_subnet.Subnet, subnet)
+
+    def find_subnet(self, name_or_id, ignore_missing=True, **args):
+        """ind IP availability of a network
+
+        :param name_or_id: The name or ID of a subnet
+        :param bool ignore_missing: When set to ``False``
+                    :class:`~openstack.exceptions.ResourceNotFound` will be
+                    raised when the resource does not exist.
+                    When set to ``True``, None will be returned when
+                    attempting to find a nonexistent resource.
+        :param dict args: Any additional parameters to be passed into
+                          underlying methods. such as query filters.
+        :returns: One :class:`~openstack.network.v2.network_ip_availability.
+                       NetworkIPAvailability` or None
+        """
+        return self._find(_subnet.Subnet, name_or_id, ignore_missing=ignore_missing, **args)
+
 
     def subnets(self, **query):
         """Retrieve a ist of vpcs

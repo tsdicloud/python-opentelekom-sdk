@@ -15,7 +15,7 @@ import uuid
 from openstack import resource
 from opentelekom import otc_resource
 
-class Vpc(resource.Resource, otc_resource.TagMixin):
+class Vpc(otc_resource.OtcResource, otc_resource.TagMixin):
     resources_key = "vpcs"
     resource_key = "vpc" # top structure is a dict for vpc
     base_path = "/vpcs"
