@@ -16,6 +16,47 @@ import pdb
 from openstack import connection
 from openstack import service_description
 
+from openstack import exceptions
+
+def connect_from_ansible(module):
+    cloud_config = module.params.pop('cloud', None)
+    try:
+        if isinstance(cloud_config, dict):
+            fail_message = (
+                "A cloud config dict was provided to the cloud parameter"
+                " but also a value was provided for {param}. If a cloud"
+                " config dict is provided, {param} should be"
+                " excluded.")
+            for param in (
+                    'auth', 'region_name', 'validate_certs',
+                    'ca_cert', 'client_key', 'api_timeout', 'auth_type'):
+                if module.params[param] is not None:
+                    module.fail_json(msg=fail_message.format(param=param))
+            # For 'interface' parameter, fail if we receive a non-default value
+            if module.params['interface'] != 'public':
+                module.fail_json(msg=fail_message.format(param='interface'))
+            cloud_conn = Connection(**cloud_config)
+        else:
+            cloud_conn = Connection(
+                cloud=cloud_config,
+                auth_type=module.params['auth_type'],
+                auth=module.params['auth'],
+                region_name=module.params['region_name'],
+                verify=module.params['verify'],
+                cacert=module.params['cacert'],
+                key=module.params['key'],
+                api_timeout=module.params['api_timeout'],
+                interface=module.params['interface'],
+            )
+        return cloud_conn
+
+    except exceptions.SDKException as e:
+        # Probably a cloud configuration/login error
+        module.fail_json(msg=str(e))
+
+
+
+
 class Connection(connection.Connection):
     """ This class is a temporary workaround for the add_service bug in 0.27.0 """
 
