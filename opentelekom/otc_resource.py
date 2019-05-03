@@ -18,6 +18,17 @@ from openstack import utils
 
 class OtcResource(resource.Resource):
 
+    def fetch(self, session, requires_id=True,
+         base_path=None, error_message=None, **params):
+         """ Open Telekom CLoud sometimes throws an Bad Request exception.although a
+             NotFound is required to make find or fetch working 
+         """
+         try:
+             return super().fetch(session=session, requires_id=requires_id,
+                 base_path=base_path, error_message=error_message, **params)
+         except exceptions.BadRequestException as bad:
+             raise exceptions.ResourceNotFound(details=bad.details, http_status=404, request_id=bad.request_id)
+
 
     def _translate_response(self, response, has_body=None, error_message=None):
         """ Open Telekom has non-uniform formats for error details,
@@ -31,9 +42,13 @@ class OtcResource(resource.Resource):
                 emsg = "[" + oerror['code']  + "] " + oerror['message'] +"\n"
             elif "error_code" in oerror:
                 emsg = "[" + oerror['error_code']  + "] " + oerror['error_msg'] +"\n"
+            elif "error" in oerror:
+                oerror = oerror['error']
+                emsg = "[" + oerror['error_code']  + "] " + oerror['error_msg'] +"\n"
             else:
                 emsg = None 
         super()._translate_response(response, has_body, error_message=emsg)
+
 
 #--- additional plausi check for OpenTelekom tags
 class TagMixin(object):
