@@ -40,6 +40,10 @@ class TestVpc(base.BaseFunctionalTest):
         self._checkTags(self.user_cloud.vpc2, self.vpcFixture.vpc,
             prefix=self.prefix, component="vpc")
 
+        vpcfound2 = self.user_cloud.vpc.find_vpc(self.prefix + "-vpc")
+        self.assertFalse(vpcfound2 is None)
+        self.assertEqual(vpcfound2.id, self.vpcFixture.vpc.id)
+
         self.user_cloud.vpc.update_vpc(self.vpcFixture.vpc.id, enable_shared_snat=True)
         found_vpc = self.user_cloud.vpc.get_vpc(self.vpcFixture.vpc.id)
         self.assertFalse(found_vpc is None)
@@ -49,3 +53,5 @@ class TestVpc(base.BaseFunctionalTest):
 
     def tearDown(self):
         super().tearDown()
+
+        
