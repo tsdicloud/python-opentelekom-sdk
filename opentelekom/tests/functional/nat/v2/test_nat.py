@@ -39,4 +39,19 @@ class TestNatGateway(base.BaseFunctionalTest):
         #import pdb; pdb.set_trace()
 
     def test_nat_found(self):
-        pass
+        natfound = self.user_cloud.nat.find_nat(self.natFixture.nat.name)
+        self.assertFalse(natfound is None)
+        self.assertEqual(natfound.id, self.natFixture.nat.id)
+        self.assertEqual(natfound.vpc_id, self.natFixture.nat.vpc_id)
+        self.assertEqual(natfound.subnet_id, self.natFixture.nat.subnet_id)
+
+        natupd = self.user_cloud.nat.update_nat(natgw=natfound,
+            name=self.natFixture.nat.name + "-x",
+            description=self.natFixture.nat.description + "-x",
+            spec="2")
+        natupd_check = self.user_cloud.nat.get_nat(natupd)
+        self.assertFalse(natupd_check is None)
+        self.assertEqual(natupd_check.name, self.natFixture.nat.name + "-x")
+        self.assertEqual(natfound.description, self.natFixture.nat.description + "-x")
+        self.assertEqual(natfound.spec, "2")
+
