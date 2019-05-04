@@ -37,6 +37,7 @@ class Rule(otc_resource.OtcResource):
         "tenant_id",
         "nat_gateway_id",
         "admin_state_up",
+        "cidr",
         "status",
         "created_at",
         "admin_state_up",
@@ -55,7 +56,7 @@ class Rule(otc_resource.OtcResource):
     subnet_id = resource.Body('network_id')
     #: cidr: variant 2 - use a CIDR for the rule
     cidr = resource.Body('cidr')
-    #: source_type: if set to 1, the rule is restricted to cid specification only
+    #: source_type: if set to 1, the rule is restricted to cidr specification only
     #: (optional)
     source_type = resource.Body('source_type', type=int)
     #: eip_id=floating_ip_id: the EIP id the SNAT route communicated with the internet

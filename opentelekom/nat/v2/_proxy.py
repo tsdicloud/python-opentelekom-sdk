@@ -41,6 +41,23 @@ class Proxy(otc_proxy.OtcProxy):
         """
         return self._update(_gw.Service, natgw, **attrs)
 
+    def find_nat(self, name_or_id, ignore_missing=True, **args):
+        """ind IP availability of a network
+
+        :param name_or_id: The name or ID of a vpc
+        :param bool ignore_missing: When set to ``False``
+                    :class:`~openstack.exceptions.ResourceNotFound` will be
+                    raised when the resource does not exist.
+                    When set to ``True``, None will be returned when
+                    attempting to find a nonexistent resource.
+        :param dict args: Any additional parameters to be passed into
+                          underlying methods. such as query filters.
+        :returns: One :class:`~openstack.network.v2.network_ip_availability.
+                       NetworkIPAvailability` or None
+        """
+        return self._find(_gw.Service, name_or_id, ignore_missing=ignore_missing, **args)
+
+
     def get_nat(self, natgw):
         """Get nat gateway information (only for the given project)
 
@@ -109,7 +126,7 @@ class Proxy(otc_proxy.OtcProxy):
         """
         return self._get(_snat.Rule, snatrule)
 
-    def snat_gw_rules(self, natgw, **query):
+    def snat_rules(self, nat_gateway, **query):
         """Retrieve a list of snat rules of a dedicated gateway
 
         :param natgw: The value can be either the id of a gateway or a
@@ -126,8 +143,29 @@ class Proxy(otc_proxy.OtcProxy):
 
         :returns: A generator of nat gw instances.
         """
-        parent_natgw = self._get_resource(_gw.Service, natgw)
+        parent_natgw = self._get_resource(_gw.Service, nat_gateway)
         return self._list(_snat.Rule, nat_gateway_id=parent_natgw.id ,**query)
+
+    def find_snat_rule(self, nat_gateway, ignore_missing=True, **query):
+        """Retrieve a list of snat rules of a dedicated gateway
+
+        :param natgw: The value can be either the id of a gateway or a
+                      :class:`~opentelekom.nat.v2.gateway.Service` instance.
+        :param kwargs query: Optional query parameters to be sent to
+            restrict the queues to be returned. Available parameters include:
+ 
+            * limit: Requests at most the specified number of items be
+                returned from the query.
+            * marker: Specifies the ID of the last-seen queue. Use the limit
+                parameter to make an initial limited request and use the ID of
+                the last-seen queue from the response as the marker parameter
+                value in a subsequent limited request.
+
+        :returns: A generator of nat gw instances.
+        """
+        parent_natgw = self._get_resource(_gw.Service, nat_gateway)
+        return self._find(_snat.Rule, name_or_id=parent_natgw.id, ignore_missing=ignore_missing, **query)
+
 
     def delete_snat_rule(self, rule, ignore_missing=True):
         """Delete a snat rule

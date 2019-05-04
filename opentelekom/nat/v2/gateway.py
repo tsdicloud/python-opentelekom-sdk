@@ -36,7 +36,7 @@ class Service(otc_resource.OtcResource, otc_resource.TagMixin):
         "id", 
         "name", 
         "description",
-       "admin_state_up",
+        "admin_state_up",
         "tenant_id",
         "spec",
         "status",
@@ -61,7 +61,7 @@ class Service(otc_resource.OtcResource, otc_resource.TagMixin):
     #: you have to use vpc peering for using the natting gateway with
     #: multiple VPC
     vpc_id = resource.Body('router_id')
-    #: subnet=internal_network_id: the subnet to add the gateway to
+    #: subnet=internal_network_id: the subnet the gateway is located
     subnet_id = resource.Body('internal_network_id')
     #--- get/query
     #: status: state of the gateway (to wait for)
