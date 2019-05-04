@@ -48,7 +48,7 @@ class CustomerMasterKey(otc_resource.OtcResource, otc_resource.TagMixin):
     #: key_id: this strage service does not use id, but key_id as identifier
     #: this property is needed for some of the special service interactions
     key_id = resource.Body("key_id", alternate_id=True)
-    #: key_state: state of key: "2"=enabled, "3"=diabled, "4"=scheduled for deletion
+    #: key_state: state of key: "2"=enabled, "3"=disabled, "4"=scheduled for deletion
     key_state = resource.Body("key_state", type=int)
     #: key_type: cmk key type
     key_type = resource.Body("key_type", type=int)

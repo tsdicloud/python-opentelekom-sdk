@@ -18,6 +18,7 @@ from openstack import service_description
 
 from openstack import exceptions
 
+
 def connect_from_ansible(module):
     cloud_config = module.params.pop('cloud', None)
     try:
