@@ -54,4 +54,8 @@ class TestNatGateway(base.BaseFunctionalTest):
         self.assertEqual(natupd_check.name, self.natFixture.nat.name + "-x")
         self.assertEqual(natfound.description, self.natFixture.nat.description + "-x")
         self.assertEqual(natfound.spec, "2")
+        snat_rules = self.user_cloud.nat.snat_rules(nat_gateway=natupd, subnet_id=natupd.subnet_id)
+        self.assertTrue(snat_rules)
+        self.assertFalse(list(snat_rules)[0] is None)
+
 

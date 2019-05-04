@@ -164,7 +164,8 @@ class Proxy(otc_proxy.OtcProxy):
         :returns: A generator of nat gw instances.
         """
         parent_natgw = self._get_resource(_gw.Service, nat_gateway)
-        return self._find(_snat.Rule, name_or_id=parent_natgw.id, ignore_missing=ignore_missing, **query)
+        # for the list query used within find, the query parameter is needed
+        return self._find(_snat.Rule, name_or_id=parent_natgw.id, ignore_missing=ignore_missing, nat_gateway_id=parent_natgw.id, **query)
 
 
     def delete_snat_rule(self, rule, ignore_missing=True):

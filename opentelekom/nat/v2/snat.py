@@ -50,7 +50,7 @@ class Rule(otc_resource.OtcResource):
     # Properties
     #--- Create
     #: nat_gateway_id: the id of the gateway the rule is for
-    nat_gateway_id = resource.Body('nat_gateway_id')
+    nat_gateway_id = resource.Body('nat_gateway_id', alternate_id=True)
     #:  subnet_id=network_id: variant 1 - use a subnet id for the rule
     #: each subnet needs an own EIP then
     subnet_id = resource.Body('network_id')

@@ -63,7 +63,7 @@ class NatFixture(fixtures.Fixture):
     def _cleanupSnatRules(self):
         if hasattr(self, 'nat') and self.nat is not None:
             # cleanup rules first
-            rules = self.user_cloud.nat.snat_gw_rules(self.nat)
+            rules = self.user_cloud.nat.snat_rules(nat_gateway=self.nat)
             for rule in rules:
                 self.user_cloud.nat.delete_snat_rule(rule)
                 self.user_cloud.nat.wait_for_delete(rule)
