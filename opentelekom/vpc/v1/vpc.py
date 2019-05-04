@@ -33,7 +33,6 @@ class Vpc(otc_resource.OtcResource, otc_resource.TagMixin):
         **resource.TagMixin._tag_query_parameters
     )
 
-
     # Properties
     #---- create
     #: name: Name of the vpc. The name is the unique identity of a queue. It
