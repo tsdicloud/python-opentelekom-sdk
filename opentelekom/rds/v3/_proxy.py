@@ -88,6 +88,22 @@ class Proxy(otc_proxy.OtcProxy):
         """
         return self._get(_db.DB, db)
 
+    def find_db(self, name_or_id, ignore_missing=True, **args):
+        """Find a rds instance by name or id
+
+        :param name_or_id: The name or ID of a rds
+        :param bool ignore_missing: When set to ``False``
+                    :class:`~openstack.exceptions.ResourceNotFound` will be
+                    raised when the resource does not exist.
+                    When set to ``True``, None will be returned when
+                    attempting to find a nonexistent resource.
+        :param dict args: Any additional parameters to be passed into
+                          underlying methods. such as query filters.
+        :returns: One :class:`~opentelekom.rds.v3.instance.DB` or None
+        """
+        return self._find(_db.DB, name_or_id, ignore_missing=ignore_missing, **args)
+
+
     def dbs(self, **query):
         """Retrieve a list of db infos
 

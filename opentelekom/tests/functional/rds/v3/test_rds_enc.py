@@ -19,112 +19,45 @@ from openstack.network.v2 import security_group_rule
 
 
 from opentelekom.tests.functional import base
-
-from opentelekom.vpc.vpc_service import VpcService
-from opentelekom.rds.rds_service import Rds3Service
+from opentelekom.tests.functional.vpc.v1 import fixture_vpc
+from opentelekom.tests.functional.kms.v1 import fixture_kms
+from opentelekom.tests.functional.rds.v3 import fixture_rds
 
 from opentelekom.rds.v3 import instance as _db
-
 
 class TestDB(base.BaseFunctionalTest):
 
     def setUp(self):
         super().setUp()
-        self.user_cloud.add_service(VpcService("vpc"))
-        self.user_cloud.add_service(Rds3Service("rdsv3"))
 
-        self.VPC_NAME = "rbe-vpc-sdktest-rds3"
-        self.SN_NAME = "rbe-sn-sdktest-rds3"
+        self.prefix = "rbe-sdktest-rds3"
 
-        self.vpc = self.user_cloud.vpc.create_vpc(
-            name=self.VPC_NAME,
-            cidr="10.248.0.0/16")
-        self.addCleanup(self.cleanup_sn)
-        self.sn = self.user_cloud.vpc.create_subnet(
-            vpc=self.vpc,
-            name=self.SN_NAME,
-            cidr="10.248.0.0/21",
-            gateway_ip="10.248.0.1"
-            )
-        self.addCleanup(self.cleanup_vpc)
-        self.user_cloud.vpc.wait_for_status(self.sn)
+        self.vpcFixture = self.useFixture(fixture_vpc.VpcFixture(self.user_cloud))
+        self.cmkFixture = self.useFixture(fixture_kms.KmsFixture(self.user_cloud))
+        self.rdsFixture = self.useFixture(fixture_rds.RdsFixture(self.user_cloud))
 
-        self.SEC_GROUP = "rbe-sec-sdktest-rds3"
-        self.secgroup = self.user_cloud.network.create_security_group(name=self.SEC_GROUP,
-          description="Rds3 cluster access control")
-        assert isinstance(self.secgroup, security_group.SecurityGroup)
-        self.assertEqual(self.SEC_GROUP, self.secgroup.name)
-        self.rul = self.user_cloud.network.create_security_group_rule(
-            direction="ingress", ethertype="IPv4",
-            port_range_max=22, port_range_min=22,
-            protocol="tcp", security_group_id=self.secgroup.id)
-        assert isinstance(self.rul, security_group_rule.SecurityGroupRule)
-        self.addCleanup(self.cleanup_secgroup)
-        
-        self._prepare_key()
+        self.vpcFixture.createTestSubnet1(self.prefix)
+        self.cmkFixture.aquireTestKey("rbe-sdktest")
+        self.rdsFixture.createTestSecGroupRds1(self.prefix)
+        self.rdsFixture.createTestRds1(self.prefix, self.vpcFixture.sn1,
+            self.rdsFixture.rds1_sg, self.cmkFixture.key)
 
-        self.CLUSTERNAME = "rbe-sdktest-rds3"
-        # check non-existence
-        instances = self.user_cloud.rdsv3.dbs()
-        myClusters = list(filter(lambda inst: inst.name.startswith(self.CLUSTERNAME), instances))
-        self.assertEqual(len(myClusters), 0)
-
-        # create
-        self.db_enc = self.user_cloud.rdsv3.create_db(
-            name=self.CLUSTERNAME,
-            datastore = {
-                'type': 'mysql',
-                'version': "5.7"
-            }, 
-            flavor_ref="rds.mysql.c2.medium",
-            volume= {
-                'type': 'COMMON',
-                'size': 100
-            },
-            disk_encryption_id=self.key.key_id,
-            region="eu-de",
-            availability_zone="eu-de-01",
-            vpc_id=self.vpc.id,
-            subnet_id=self.sn.id,
-            security_group_id=self.secgroup.id,
-            password="Test@12345678")
-            # region=self.user_cloud.session.get_project_id(),
-        self.addCleanup(self.cleanup_db)
-        self.user_cloud.rdsv3.wait_for_status(self.db_enc)
-
-    def test_cluster_found_update(self):
-        db_found = self.user_cloud.rdsv3.get_db(self.db_enc)
+    def test_rds_enc_found_update(self):
+        db_found = self.user_cloud.rdsv3.get_db(self.rdsFixture.rds1)
         self.assertFalse(db_found is None)
         self.assertTrue( isinstance(db_found, _db.DB) )
-        self.assertEqual(db_found.id, self.db_enc.id)
+        self.assertEqual(db_found.id, self.rdsFixture.rds1.id)
+
+        db_found2 = self.user_cloud.rdsv3.find_db(self.prefix+ "-db1")
+        self.assertFalse(db_found2 is None)
+        self.assertTrue( isinstance(db_found2, _db.DB) )
+        self.assertEqual(db_found2.id, self.rdsFixture.rds1.id)
         
 
     def tearDown(self):
         super().tearDown()
-
-
-    def cleanup_db(self):
-        if self.db_enc is not None:
-            self.user_cloud.rdsv3.delete_db(self.db_enc)
-            self.user_cloud.rdsv3.wait_for_delete(self.db_enc)
-            # subnet still has some delay until it could be deleted, so delay the next clenup
-            # a litte bit
-            time.sleep(20)
-    
-    def cleanup_secgroup(self):
-        if self.secgroup is not None:
-            rules = self.user_cloud.network.security_group_rules(security_group_id=self.secgroup.id)    
-            for rule in rules:
-                self.user_cloud.network.delete_security_group_rule(rule)
-            self.secgroup = self.user_cloud.network.delete_security_group(self.secgroup)
-
-    def cleanup_sn(self):
-        if self.sn is not None:
-            self.user_cloud.vpc.delete_subnet(subnet=self.sn.id)
-            self.user_cloud.vpc.wait_for_delete(self.sn)
-
-    def cleanup_vpc(self):
-        if self.vpc is not None:
-            self.user_cloud.vpc.delete_vpc(self.vpc.id)
-
-
+        
+        # check non-existence
+        instances = self.user_cloud.rdsv3.dbs()
+        myClusters = list(filter(lambda inst: inst.name.startswith(self.prefix+ "-db1"), instances))
+        self.assertEqual(len(myClusters), 0)
