@@ -55,7 +55,6 @@ class KmsFixture(fixtures.Fixture):
         if self.reuse:
             # try to reuse key in case of no lifecycle test
             key = self._find_enabled_key(name)
-        import pdb; pdb.set_trace()
         if key is None:
             # create a key (if none is available or no reuse)
             self.CMK_NAME = self._find_next_version(name)            
