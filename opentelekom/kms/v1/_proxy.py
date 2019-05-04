@@ -42,7 +42,7 @@ class Proxy(otc_proxy.OtcProxy):
                             the key. e.g. sequence
         :rtype: :class:`~openstack.kms.v1.cmk.CustomrMasterKey`
         """
-       return self._get(_cmk.CustomerMasterKey, key)
+        return self._get(_cmk.CustomerMasterKey, key)
     
     def find_key(self, name_or_id, ignore_missing=True, **args):
         """ind IP availability of a network
