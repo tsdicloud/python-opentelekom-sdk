@@ -14,6 +14,7 @@ import uuid
 
 from openstack import resource
 from openstack import utils
+from openstack import exceptions
 
 from opentelekom import otc_resource
 
@@ -114,7 +115,10 @@ class DB(otc_resource.OtcResource, otc_resource.TagMixin):
               base_path=None, error_message=None, **params):
         # RDS3 has no dedicated GET Method, so we have to use the list query with id
         result = list(DB.list(session, base_path=base_path, id=self.id))
-        return result[0] if ( len(result)>0 ) else None
+        if result:
+            return result[0]
+        else:
+            raise exceptions.ResourceNotFound(details="RDS DB not found.", http_status=404)
 
     def create(self, session, prepend_key=False, base_path=None):
         # disable resource_key prepend, and fake an initial status for wait
