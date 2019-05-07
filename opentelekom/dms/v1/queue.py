@@ -39,7 +39,7 @@ class Queue(otc_resource.OtcResource, otc_resource.TagMixin):
     #: Name of the queue. The name is the unique identity of a queue. It
     #: must not exceed 64 bytes in length, and it is limited to US-ASCII
     #: letters, digits, underscores, and hyphens.
-    name = resource.Body("name", alternate_id=True)
+    name = resource.Body("name")
     #: type of the queue; one of NORMAL, FIFO, KAFKA_HA, KAFKA_HT
     queue_mode = resource.Body("queue_mode",)
     #: Description of the queue.
@@ -56,3 +56,20 @@ class Queue(otc_resource.OtcResource, otc_resource.TagMixin):
     #: only valid for mode KAFKA_HA or KAFKA_HT
     #: value range 1-72
     retention_hours = resource.Body("retention_hours", type=int)
+    #--- get/fetch
+    #: the name of the Kafka topic if a Kafka topic is addressed
+    kafka_topic = resource.Body("kafka_topic")
+    #: the date of creation
+    created = resource.Body("created")
+    #: retention time in minutes
+    reservation = resource.Body("reservation")
+    #: maximum message size
+    max_msg_size_byte = resource.Body("max_msg_size_byte")
+    #: total number of messages in a queue
+    produced_messages = resource.Body("produced_messages")
+    #: are deadletter queues enables
+    redrive_policy = resource.Body("redrive_policy")
+    #: maximum number of messages allowed
+    max_consume_count = resource.Body("max_consume_count", type=int)
+    #: mnumber of consumption groups
+    group_count = resource.Body("group_count", type=int)

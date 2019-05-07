@@ -14,6 +14,8 @@ import six
 
 from openstack import exceptions
 from opentelekom.tests.functional import base
+from opentelekom.tests.functional.dms.v1 import fixture_dms
+
 
 from opentelekom.dms.dms_service import DmsService
 
@@ -24,27 +26,40 @@ class TestQueue(base.BaseFunctionalTest):
         super().setUp()
         self.user_cloud.add_service(DmsService("dmsv1"))
 
-        self.QUEUE_NAME = "rbe-dms-testsdkq1"
-        self.queue = self.user_cloud.dmsv1.create_queue(
-            name=self.QUEUE_NAME,
-            queue_mode="NORMAL",
-            description="Open Telekom functional SDK test",
-            redrive_policy="enable",
-            max_consume_count=10
-        )
+        self.prefix = "rbe-sdktest-css"
+
+        self.dmsFixture = self.useFixture(fixture_dms.DmsFixture(self.user_cloud))
+        self.dmsFixture.createTestQueue(self.prefix)
+        self.dmsFixture.createTestQueueGroup(self.prefix)
 
     def test_queue_found(self):
         queues = list(self.user_cloud.dmsv1.queues(include_deadletter=True))
         self.assertGreater(len(queues), 0)
         #import pdb; pdb.set_trace()
-        qfound = list(filter(lambda x: x['name'] == self.QUEUE_NAME, queues ))
+        qfound = list(filter(lambda x: x['name'] == self.prefix+"-q", queues ))
         self.assertEqual(len(qfound), 1)
-        
-        found_queue = self.user_cloud.dmsv1.get_queue(self.queue.id)
-        self.assertFalse(found_queue is None)
-        self.assertEqual(found_queue.id, self.queue.id)
+
+        groups = list(self.user_cloud.dmsv1.queue_groups(self.dmsFixture.queue,include_deadletter=True))
+        self.assertGreater(len(groups), 0)
+        #import pdb; pdb.set_trace()
+        gfound = list(filter(lambda x: x['name'] == self.prefix+"-qgroup", groups ))
+        self.assertEqual(len(gfound), 1)
+
+        found_queue = self.user_cloud.dmsv1.get_queue(self.dmsFixture.queue.id)
+        self.assertTrue(found_queue)
+        self.assertEqual(found_queue.id, self.dmsFixture.queue.id)
+        found_group = self.user_cloud.dmsv1.get_queue_group(queue=self.dmsFixture.queue.id, 
+          group=self.dmsFixture.queue_group.id)
+        self.assertTrue(found_group)
+        self.assertEqual(found_group.id, self.dmsFixture.queue_group.id)
+
+        found_queue_again = self.user_cloud.dmsv1.find_queue(self.dmsFixture.queue.name)
+        self.assertTrue(found_queue_again)
+        self.assertEqual(found_queue_again.id, self.dmsFixture.queue.id)
+        found_group_again = self.user_cloud.dmsv1.find_queue_group(queue=found_queue_again, 
+            name_or_id=self.dmsFixture.queue_group.name)
+        self.assertTrue(found_group_again)
+        self.assertEqual(found_group_again.id, self.dmsFixture.queue_group.id)
 
     def tearDown(self):
         super().tearDown()
-        if self.queue is not None:
-            self.user_cloud.dmsv1.delete_queue(self.queue)
