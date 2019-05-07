@@ -33,13 +33,13 @@ class OtcResource(resource.Resource):
     def _translate_response(self, response, has_body=None, error_message=None):
         """ Open Telekom has non-uniform formats for error details,
             so we try to adapte the different formats to get uesful information out of exceptions """
-        emsg = None 
+        emsg = None
         if has_body is None:
             has_body = self.has_body
         if has_body:
             oerror = response.json()
             if "code" in oerror:
-                emsg = "[" + oerror['code']  + "] " + oerror['message'] +"\n"
+                emsg = "[" + str(oerror['code'])  + "] " + oerror['message'] +"\n"
             elif "error_code" in oerror:
                 emsg = "[" + oerror['error_code']  + "] " + oerror['error_msg'] +"\n"
             elif "error" in oerror:
@@ -47,7 +47,7 @@ class OtcResource(resource.Resource):
                 emsg = "[" + oerror['error_code']  + "] " + oerror['error_msg'] +"\n"
             else:
                 emsg = None 
-        super()._translate_response(response, has_body, error_message=emsg)
+        super()._translate_response(response, has_body=has_body, error_message=emsg)
 
 
 #--- additional plausi check for OpenTelekom tags

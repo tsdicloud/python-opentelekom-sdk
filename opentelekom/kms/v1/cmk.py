@@ -42,7 +42,7 @@ class CustomerMasterKey(otc_resource.OtcResource, otc_resource.TagMixin):
     origin = resource.Body("origin")
     #: sequence: an external, 36-byte serial number as additional reference
     sequence = resource.Body("sequence")
-    #: pending_days: this property is only needed for schedules deletion
+    #: pending_days: this property is only needed for schedules deletion 7-1096
     pending_days = resource.Body("pending_days")
     #---- returned only by queries
     #: key_id: this strage service does not use id, but key_id as identifier

@@ -15,7 +15,7 @@ from opentelekom.rds.v3 import datastore as _datastore
 from opentelekom.rds.v3 import flavor as _flavor
 from opentelekom.rds.v3 import instance as _db
 
-from openstack import resource
+from openstack import resource, proxy
 
 class Proxy(otc_proxy.OtcProxy):
 

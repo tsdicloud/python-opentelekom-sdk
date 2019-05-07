@@ -39,39 +39,55 @@ class Proxy(otc_proxy.OtcProxy):
         """Create a new cloud search service from attributes
 
         :param dict attrs: Keyword arguments which will be used to create
-                           a :class:`~openstack.message.v2.queue.Queue`,
-                           comprised of the properties on the Queue class.
+                           a :class:`~opentelekom.css.v1.cluster.Cluster`,
+                           comprised of the properties on the css cluster class.
 
         :returns: The results of cluster creation
-        :rtype: :class:`~opentelekom.vpc.v1.Vpc`
+        :rtype: :class:`~opentelekom.css.v1.cluster.Cluster`
          """
         return self._create(_elastic.Cluster, **attrs)
 
     def update_css(self, cluster, **attrs):
-        """Update vpc attributes
+        """Update css cluster attributes
 
         :param dict attrs: Keyword arguments which will be used to create
                            comprised of the properties on the Vpc class.
 
         :returns: The results of vpc update
-        :rtype: :class:`~opentelekom.vpc.v1.Vpc`
+        :rtype: :class:`~opentelekom.css.v1.cluster.Cluster`
         """
         return self._update(_elastic.Cluster, cluster, **attrs)
 
     def get_css(self, cluster):
-        """Get a vpc
+        """Get a css cluster
 
         :param queue: The value can be the name of a queue or a
-            :class:`~opentelekom.vpc.v1.Vpc` instance.
+            :class:`~pentelekom.css.v1.cluster.Cluster` instance.
 
-        :rtype: :class:`~opentelekom.vpc.Vpc`
+        :rtype: :class:`~opentelekom.css.v1.cluster.Cluster`
         :raises: :class:`~openstack.exceptions.ResourceNotFound` when no
             queue matching the name could be found.
         """
         return self._get(_elastic.Cluster, cluster)
 
+    def find_cluster(self, name_or_id, ignore_missing=True, **args):
+        """Find a rds instance by name or id
+
+        :param name_or_id: The name or ID of a css cluster
+        :param bool ignore_missing: When set to ``False``
+                    :class:`~openstack.exceptions.ResourceNotFound` will be
+                    raised when the resource does not exist.
+                    When set to ``True``, None will be returned when
+                    attempting to find a nonexistent resource.
+        :param dict args: Any additional parameters to be passed into
+                          underlying methods. such as query filters.
+        :returns: One :class:`~opentelekom.css.v1.cluster.Cluster` or None
+        """
+        return self._find(_elastic.Cluster, name_or_id, ignore_missing=ignore_missing, **args)
+
+
     def clusters(self, **query):
-        """Retrieve a ist of vpcs
+        """Retrieve a ist of cssc clusters
 
         :param kwargs query: Optional query parameters to be sent to
             restrict the queues to be returned. Available parameters include:
@@ -90,8 +106,8 @@ class Proxy(otc_proxy.OtcProxy):
     def delete_css(self, cluster, ignore_missing=True):
         """Delete a css cluster
 
-        :param vpc: The value can be either the name of a vpc or a
-                      :class:`~opentelekom.vpc.v1.Vpc` instance.
+        :param vpc: The value can be either the name of a css cluster or a
+                      :class:`~pentelekom.css.v1.cluster.Cluster` instance.
         :param bool ignore_missing: When set to ``False``
                     :class:`~openstack.exceptions.ResourceNotFound` will be
                     raised when the queue does not exist.

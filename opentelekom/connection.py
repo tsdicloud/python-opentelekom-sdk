@@ -20,6 +20,8 @@ from openstack import exceptions
 
 
 def connect_from_ansible(module):
+    """ The method contains also a temporary fix for rdsv3 endpoint """
+    # FIXME
     cloud_config = module.params.pop('cloud', None)
     try:
         if isinstance(cloud_config, dict):
@@ -48,6 +50,7 @@ def connect_from_ansible(module):
                 key=module.params['key'],
                 api_timeout=module.params['api_timeout'],
                 interface=module.params['interface'],
+                rdsv3_endpoint_override="https://rds.eu-de.otc.t-systems.com/v3/%(project_id)s"
             )
         return cloud_conn
 
