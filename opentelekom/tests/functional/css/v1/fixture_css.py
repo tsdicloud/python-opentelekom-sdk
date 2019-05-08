@@ -57,9 +57,9 @@ class CssFixture(fixtures.Fixture):
 
     def createTestCss(self, prefix, subnet, secgroup, key):
         vpc_id=subnet.vpc_id
-        self.css = self.user_cloud.css.create_css(name=prefix + "-css", 
-            instanceNum=1, 
-            instance={
+        self.css = self.user_cloud.css.create_cluster( **{ 'name': prefix + "-css", 
+            'instanceNum': 1, 
+            'instance': {
                 "flavorRef": "css.medium.8",
                 "volume": {
                     "volume_type": "COMMON",
@@ -68,20 +68,21 @@ class CssFixture(fixtures.Fixture):
                 "nics": {
                     "vpcId": vpc_id,
                     "netId": subnet.id,
-                    "securityGroudId": secgroup.id
+                    "securityGroupId": secgroup.id,
                 }
             },
-            httpsEnable="true",
-            diskEncryption= { 
+            "httpsEnable": "true",
+            "diskEncryption": { 
                 "systemEncrypted": "1", 
-                "systemCmkid": key.id 
-            })
+                "systemCmkid": key.id, 
+            }
+        })
         self.addCleanup(self._cleanupTestCss)
         self.user_cloud.css.wait_for_status(self.css)
 
     def _cleanupTestCss(self):
         if hasattr(self, 'css') and self.css:
-            self.user_cloud.css.delete_css(self.css)
+            self.user_cloud.css.delete_cluster(self.css)
             self.user_cloud.css.wait_for_delete(self.css)
 
     def tearDown(self):

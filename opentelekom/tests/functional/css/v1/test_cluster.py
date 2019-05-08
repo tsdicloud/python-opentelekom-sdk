@@ -41,8 +41,8 @@ class TestCluster(base.BaseFunctionalTest):
         self.vpcFixture.createTestSubnet1(self.prefix)
         self.cmkFixture.aquireTestKey("rbe-sdktest")
         self.cssFixture.createTestSecGroupCss(self.prefix)
-        self.cssFixture.createTestCss(self.prefix, self.vpcFixture.sn1,
-            self.cssFixture.sg_css, self.cmkFixture.key)
+        self.cssFixture.createTestCss(prefix=self.prefix, subnet=self.vpcFixture.sn1,
+            secgroup=self.cssFixture.sg_css, key=self.cmkFixture.key)
 
     def test_cluster_found_update(self):
         clusters = list(self.user_cloud.css.clusters())
@@ -52,12 +52,12 @@ class TestCluster(base.BaseFunctionalTest):
     
         # TODO: restart, expand tests
 
-        found_cluster = self.user_cloud.cluster.get_cluster(self.cs.id)
+        found_cluster = self.user_cloud.cluster.get_cluster(self.css.id)
         self.assertFalse(found_cluster is not None)
         self.assertEqual(found_cluster.id, self.css.id)
         self.assertEqual(found_cluster.name, self.css.name)
 
-        found_again = self.user_cloud.cluster.find_css(self.css.name)
+        found_again = self.user_cloud.cluster.find_cluster(self.css.name)
         self.assertTrue(found_again)
         self.assertEqual(found_again.id, self.css.id)
 

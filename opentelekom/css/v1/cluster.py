@@ -22,7 +22,7 @@ class Cluster(otc_resource.OtcResource, otc_resource.TagMixin):
 
      # capabilities
     allow_create = True
-    allow_commit = True
+    allow_commit = False
     allow_list = True
     allow_fetch = True
     allow_delete = True
@@ -49,3 +49,28 @@ class Cluster(otc_resource.OtcResource, otc_resource.TagMixin):
     diskEncryption = resource.Body("diskEncryption", type=dict)
     #: httpsEncryption: enable/disable https (optional, default True)
     httpsEnable = resource.Body("httpsEnable") # value true or false, but NOT a bool
+    #: -- get/fetch
+    #: status: cluster status
+    status = resource.Body("status")
+    #: created: creation timestamp
+    created = resource.Body("created")
+    #: updated: last update timestamp
+    updated = resource.Body("updated")
+    #: endpoint: usr access point from Internet (IP)
+    endpoint = resource.Body("endpoint")
+    #: endpoint: usr access point from Internet (IP)
+    diskEncrypted = resource.Body("diskEncrypted", type=bool)
+    #: cmkId: key the cluster is encrpyted with
+    cmkId = resource.Body("cmkId")
+    #: clusters: details abut the cluster nodes
+    clusters = resource.Body("clusters", type=list)
+    #: actionProgess: details about the creation process progress
+    actionProgress = resource.Body("actionProgress", type=dict)
+    #: actions: current cluster behavior
+    actions = resource.Body("actions", type=list)
+    #: vpcId: vpc of the cluster location
+    vpcId = resource.Body("vpcId")
+    #: netId: subnet of the cluster location
+    subnetId = resource.Body("subnetId")
+    #: securityGroupId: the security group protevting the cluster
+    securityGroupId = resource.Body("securityGroupId")

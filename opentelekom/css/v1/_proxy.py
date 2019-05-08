@@ -35,7 +35,7 @@ class Proxy(otc_proxy.OtcProxy):
         """
         return self._list(_flavor.Flavor, **query)
     
-    def create_css(self, **attrs):
+    def create_cluster(self, **attrs):
         """Create a new cloud search service from attributes
 
         :param dict attrs: Keyword arguments which will be used to create
@@ -47,18 +47,18 @@ class Proxy(otc_proxy.OtcProxy):
          """
         return self._create(_elastic.Cluster, **attrs)
 
-    def update_css(self, cluster, **attrs):
-        """Update css cluster attributes
+#    def update_css(self, cluster, **attrs):
+#        """Update css cluster attributes
+#
+#        :param dict attrs: Keyword arguments which will be used to create
+#                           comprised of the properties on the Vpc class.
+#
+#        :returns: The results of vpc update
+#        :rtype: :class:`~opentelekom.css.v1.cluster.Cluster`
+#        """
+#        return self._update(_elastic.Cluster, cluster, **attrs)
 
-        :param dict attrs: Keyword arguments which will be used to create
-                           comprised of the properties on the Vpc class.
-
-        :returns: The results of vpc update
-        :rtype: :class:`~opentelekom.css.v1.cluster.Cluster`
-        """
-        return self._update(_elastic.Cluster, cluster, **attrs)
-
-    def get_css(self, cluster):
+    def get_cluster(self, cluster):
         """Get a css cluster
 
         :param queue: The value can be the name of a queue or a
@@ -103,7 +103,7 @@ class Proxy(otc_proxy.OtcProxy):
         """
         return self._list(_elastic.Cluster, **query)
 
-    def delete_css(self, cluster, ignore_missing=True):
+    def delete_cluster(self, cluster, ignore_missing=True):
         """Delete a css cluster
 
         :param vpc: The value can be either the name of a css cluster or a
@@ -119,7 +119,7 @@ class Proxy(otc_proxy.OtcProxy):
         return self._delete(_elastic.Cluster, cluster, ignore_missing=ignore_missing)
 
     def wait_for_status(self, res, status='ACTIVE', failures=None,
-                        interval=2, wait=120):
+                        interval=15, wait=1500):
         """Wait for a resource to be in a particular status.
 
         :param res: The resource to wait on to reach the specified status.
@@ -144,7 +144,7 @@ class Proxy(otc_proxy.OtcProxy):
         return resource.wait_for_status(
             self, res, status, failures, interval, wait)
 
-    def wait_for_delete(self, res, interval=2, wait=120):
+    def wait_for_delete(self, res, interval=15, wait=1200):
         """Wait for a resource to be deleted.
 
         :param res: The resource to wait on to be deleted.
