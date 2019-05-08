@@ -165,6 +165,4 @@ class Proxy(otc_proxy.OtcProxy):
         :returns: ``None``
         """
         q  = self._get_resource(_queue.Queue, queue)
-        qgroup = self._get_resource(_group.ConsumerGroup, group)
-        qgroup.queue_id = q.id
-        self._delete(_group.ConsumerGroup, qgroup, ignore_missing=ignore_missing)
+        self._delete(_group.ConsumerGroup, group, ignore_missing=ignore_missing, queue_id=q.id)
