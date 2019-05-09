@@ -45,12 +45,13 @@ def connect_from_ansible(module):
                 auth_type=module.params['auth_type'],
                 auth=module.params['auth'],
                 region_name=module.params['region_name'],
-                verify=module.params['verify'],
+                verify=module.params['validate_certs'],
                 cacert=module.params['cacert'],
-                key=module.params['key'],
+                key=module.params['client_key'],
                 api_timeout=module.params['api_timeout'],
                 interface=module.params['interface'],
-                rdsv3_endpoint_override="https://rds.eu-de.otc.t-systems.com/v3/%(project_id)s"
+                # Endpoint override workarounds: add here
+                # rdsv3_endpoint_override="https://rds.eu-de.otc.t-systems.com/v3/%(project_id)s"
             )
         return cloud_conn
 
