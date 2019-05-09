@@ -118,9 +118,11 @@ class Proxy(otc_proxy.OtcProxy):
         """
         return self._delete(_elastic.Cluster, cluster, ignore_missing=ignore_missing)
 
-    def wait_for_status(self, res, status='ACTIVE', failures=None,
+    def wait_for_status(self, res, status='200', failures=None,
                         interval=15, wait=1500):
         """Wait for a resource to be in a particular status.
+
+        FIXME: 200 is not a proper Openstack status. Should be something like FAIL, ACTIVE  ect
 
         :param res: The resource to wait on to reach the specified status.
                     The resource must have a ``status`` attribute.
