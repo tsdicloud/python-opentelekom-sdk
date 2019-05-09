@@ -45,9 +45,9 @@ def connect_from_ansible(module):
                 auth_type=module.params['auth_type'],
                 auth=module.params['auth'],
                 region_name=module.params['region_name'],
-                verify=module.params['validate_certs'],
+                verify=module.params.get('verify', module.params['validate_certs']),
                 cacert=module.params['cacert'],
-                key=module.params['client_key'],
+                key=module.params.get('key', module.params['client_key']),
                 api_timeout=module.params['api_timeout'],
                 interface=module.params['interface'],
                 # Endpoint override workarounds: add here
