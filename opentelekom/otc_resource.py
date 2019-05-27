@@ -32,7 +32,7 @@ class OtcResource(resource.Resource):
 
     def _translate_response(self, response, has_body=None, error_message=None):
         """ Open Telekom has non-uniform formats for error details,
-            so we try to adapte the different formats to get uesful information out of exceptions """
+            so we try to adapt the different formats to get useful information out of exceptions """
         emsg = None
         if has_body is None:
             has_body = self.has_body
