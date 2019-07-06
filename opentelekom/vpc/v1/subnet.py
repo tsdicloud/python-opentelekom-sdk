@@ -53,7 +53,8 @@ class Subnet(otc_resource.OtcResource, otc_resource.TagMixin):
     #: secondary_dns: IP address of a DNS servers (optional)
     secondary_dns = resource.Body("secondary_dns")
     #: dnsList: alternative DNS server list is primary/secondary is not enough (optional)
-    dnsList = resource.Body("dnsList", type=list, default=["100.125.4.25", "8.8.8.8"], coerce_to_default=True)
+    # dnsList = resource.Body("dnsList", type=list, default=["100.125.4.25", "8.8.8.8"], coerce_to_default=True)
+    dnsList = resource.Body("dnsList", type=list)
     #: availability_zone: availability_zone for the subnet(backward compatibility only)
     availability_zone = resource.Body("availability_zone")
     #: vpc_id: the vpc the subnet belongs to
@@ -64,6 +65,15 @@ class Subnet(otc_resource.OtcResource, otc_resource.TagMixin):
     #: status: the status of the subnet to observe
     status = resource.Body("status")
  
+    def _prepare_request(self, requires_id=True, prepend_key=True,
+                         base_path=None):
+        '''This is a workaround for the non-properly working default value of the resource framework
+           see openstacksdk.compute.v2.server. The constraint is even better, so keep it for the future'''
+        if not self.primary_dns and not self.secondary_dns:
+            self.dnsList = ["100.125.4.25", "8.8.8.8"]
+
+        return super()._prepare_request(requires_id=requires_id,
+            prepend_key=prepend_key, base_path=base_path)
 
 class VpcSubnetAssoc(resource.Resource):
     """A special resource to handle the abnormal DELETE case for subnets on VPC
@@ -81,5 +91,4 @@ class VpcSubnetAssoc(resource.Resource):
     #: letters, digits, underscores, and hyphens.
     vpc_id = resource.URI("vpc_id")
     #: the subnet id to address
-    id = resource.Body("id")
- 
+    id = resource.Body("id") 
