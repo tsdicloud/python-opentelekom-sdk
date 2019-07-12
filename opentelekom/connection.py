@@ -66,38 +66,38 @@ class Connection(connection.Connection):
     """ This class is a temporary workaround for the add_service bug in 0.27.0 """
 
     # FIXME: remove if registration bug of (at least since) 0.27.0 is fixed
-    def add_service(self, service):
-        """Add a service to the Connection.
+    # def add_service(self, service):
+    #     """Add a service to the Connection.
 
-        Attaches an instance of the :class:`~openstack.proxy.Proxy`
-        class contained in
-        :class:`~openstack.service_description.ServiceDescription`.
-        The :class:`~openstack.proxy.Proxy` will be attached to the
-        `Connection` by its ``service_type`` and by any ``aliases`` that
-        may be specified.
+    #     Attaches an instance of the :class:`~openstack.proxy.Proxy`
+    #     class contained in
+    #     :class:`~openstack.service_description.ServiceDescription`.
+    #     The :class:`~openstack.proxy.Proxy` will be attached to the
+    #     `Connection` by its ``service_type`` and by any ``aliases`` that
+    #     may be specified.
 
-        :param openstack.service_description.ServiceDescription service:
-            Object describing the service to be attached. As a convenience,
-            if ``service`` is a string it will be treated as a ``service_type``
-            and a basic
-            :class:`~openstack.service_description.ServiceDescription`
-            will be created.
-        """
-        # If we don't have a proxy, just instantiate Proxy so that
-        # we get an adapter.
-        if isinstance(service, six.string_types):
-            service = service_description.ServiceDescription(service)
+    #     :param openstack.service_description.ServiceDescription service:
+    #         Object describing the service to be attached. As a convenience,
+    #         if ``service`` is a string it will be treated as a ``service_type``
+    #         and a basic
+    #         :class:`~openstack.service_description.ServiceDescription`
+    #         will be created.
+    #     """
+    #     # If we don't have a proxy, just instantiate Proxy so that
+    #     # we get an adapter.
+    #     if isinstance(service, six.string_types):
+    #         service = service_description.ServiceDescription(service)
 
-        # Directly invoke descriptor of the ServiceDescription
-        def getter(self):
-            return service.__get__(self, owner=None)
+    #     # Directly invoke descriptor of the ServiceDescription
+    #     def getter(self):
+    #         return service.__get__(self, owner=None)
 
-        # Register the ServiceDescription class (as property)
-        # with every known alias for a "runtime descriptor"
-        all_types = [service.service_type] + service.aliases
-        for attr_name in all_types:
-            setattr(
-                self.__class__,
-                attr_name.replace('-', '_'),
-                property(fget=getter)
-            )
+    #     # Register the ServiceDescription class (as property)
+    #     # with every known alias for a "runtime descriptor"
+    #     all_types = [service.service_type] + service.aliases
+    #     for attr_name in all_types:
+    #         setattr(
+    #             self.__class__,
+    #             attr_name.replace('-', '_'),
+    #             property(fget=getter)
+    #         )
