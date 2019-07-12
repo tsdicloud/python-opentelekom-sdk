@@ -45,6 +45,7 @@ class OtcMockResponse(requests.Response):
         self.url_match = url_match
         self.path = path
         self.headers = self.default_headers
+        self.history = []
         if headers:
             self.headers.update(headers)
         # timestamp representation of the form: Thu, 23 May 2019 15:11:11 GMT
@@ -91,6 +92,10 @@ class OtcMockService:
         try:
             response = next(filter(matchURL, cls.responses))
             response.num_called += 1
+            req = requests.Request(method, url)
+            response.request = req.prepare()
+            response.history = []
+            response.elapsed = datetime.timedelta(milliseconds=300)
             return response
         except StopIteration:
             u = urlparse(url)
