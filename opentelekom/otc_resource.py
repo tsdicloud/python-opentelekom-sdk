@@ -18,6 +18,7 @@ from openstack import utils
 
 class OtcResource(resource.Resource):
 
+    # ===== adaptions of standard methods for OTC
     def fetch(self, session, requires_id=True,
          base_path=None, error_message=None, **params):
          """ Open Telekom CLoud sometimes throws an Bad Request exception.although a
@@ -33,24 +34,53 @@ class OtcResource(resource.Resource):
     def _translate_response(self, response, has_body=None, error_message=None):
         """ Open Telekom has non-uniform formats for error details,
             so we try to adapt the different formats to get useful information out of exceptions """
-        emsg = None
+        isError = False
         if has_body is None:
             has_body = self.has_body
         if has_body:
-            oerror = response.json()
-            if "code" in oerror:
-                emsg = "[" + str(oerror['code'])  + "] " + oerror['message'] +"\n"
-            elif "error_code" in oerror:
-                emsg = "[" + oerror['error_code']  + "] " + oerror['error_msg'] +"\n"
-            elif "error" in oerror:
-                oerror = oerror['error']
-                emsg = "[" + oerror['error_code']  + "] " + oerror['error_msg'] +"\n"
-            else:
-                emsg = None 
-        super()._translate_response(response, has_body=has_body, error_message=emsg)
+            content_type = response.headers.get('content-type', '')
+            if response.content and 'application/json' in content_type:
+                oerror = response.json()
+                emsg = ""
+                # Normalize to dict if error is described as a sub-structure
+                if "error" in oerror:
+                    isError = True
+                    oerror = oerror['error']
+                # first: extract some know code,value pairs
+                if "code" in oerror:
+                    isError = True
+                    emsg += "[" + str(oerror['code']) + "]"
+                    if "message" in oerror:
+                        emsg += " " + oerror['message'] + "\n"
+                    else:
+                        emsg += "\n"
+                if "error_code" in oerror:
+                    isError = True
+                    if "error_msg" in oerror:
+                        emsg += " " + oerror['error_msg'] + "\n"
+                    else:
+                        emsg += "\n"
+                if "errorCode" in oerror:
+                    isError = True
+                    emsg += "[" + oerror['errorCode'] + "]"
+                    if "message" in oerror:
+                        emsg += " " + oerror['message'] + "\n"
+                    else:
+                        emsg += "\n"
+                # second: collect reasons in case of error to not loose information
+                if isError:
+                    for reason, msg in oerror.items():
+                        if reason not in ['code', 'error_code', 'errorCode', 'message', 'error_msg']:
+                            emsg += reason + "=" + msg + '\n'
+
+        super()._translate_response(response, has_body=has_body, error_message=emsg if isError else None)
+
+        #==== additional convenience functions =====
 
 
-#--- additional plausi check for OpenTelekom tags
+
+
+#==== OpenTelekom Cloud key/value extended tag handling ====
 class TagMixin(object):
 
     #: A list of associated tags
