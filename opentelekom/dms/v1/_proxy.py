@@ -90,7 +90,7 @@ class Proxy(otc_proxy.OtcProxy):
 
         :returns: ``None``
         """
-        self._delete(_queue.Queue, value, ignore_missing=ignore_missing)
+        return self._delete(_queue.Queue, value, ignore_missing=ignore_missing)
 
     def create_queue_group(self, queue, **attrs):
         """Create a new queue from attributes
@@ -165,4 +165,4 @@ class Proxy(otc_proxy.OtcProxy):
         :returns: ``None``
         """
         q  = self._get_resource(_queue.Queue, queue)
-        self._delete(_group.ConsumerGroup, group, ignore_missing=ignore_missing, queue_id=q.id)
+        return self._delete(_group.ConsumerGroup, group, ignore_missing=ignore_missing, queue_id=q.id)
