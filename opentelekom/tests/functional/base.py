@@ -19,6 +19,7 @@ from openstack.tests.functional import base
 from opentelekom.rds.rds_service import Rds3Service
 from opentelekom.kms.kms_service import KmsService
 
+from unittest import case
 
 class BaseFunctionalTest(base.BaseFunctionalTest):
 
@@ -29,38 +30,6 @@ class BaseFunctionalTest(base.BaseFunctionalTest):
         self.user_cloud = otc_connection.Connection(config=user_config)
         base._disable_keep_alive(self.user_cloud)
                                                     
-    def _find_enabled_key(self):
-         # because of the delayed delete, just look for an enabled key to reuse first
-        cmks = list(self.user_cloud.kms.keys())
-        enabledKeys = list(filter(lambda res: res.key_alias.startswith(self.CMK_PREFIX) and int(res.key_state)==2, cmks))
-        enabledKeys.sort(key=lambda x: x.key_alias)
-        return enabledKeys[0] if len(enabledKeys)>0 else None
-        
-    def _find_next_version(self):
-        cmks = list(self.user_cloud.kms.keys())
-        _vexp = re.compile('^' + self.CMK_PREFIX + '-([0-9]+)$')
-        # search for matching names and extract the highest serial version number
-        cmk_last_serial = reduce(max, map(lambda vers: int(_vexp.match(vers.key_alias).group(1)), cmks), 0)
-        cmk_last_serial += 1
-        return "{prefix}-{serial:06d}".format(serial=cmk_last_serial, prefix=self.CMK_PREFIX)
-
-    def _prepare_key(self):
-        self.addCleanup(self.cleanup)
-
-        self.CMK_PREFIX = "rbe-sdktest-key"
-        key = None
-        if self.reuse:
-            # try to reuse key in case of no lifecycle test
-            key = self._find_enabled_key()
-        if key is None:
-            # create a key (if none is available or no reuse)
-            self.CMK_NAME = self._find_next_version()            
-            key = self.user_cloud.kmsv1.create_key(
-                 key_alias=self.CMK_NAME,
-                 key_description='Open Telekom SDK test key')
-        self.key = self.user_cloud.kmsv1.get_key(key)       
-
-
     def setUp(self):
         super().setUp()
 
@@ -69,6 +38,10 @@ class BaseFunctionalTest(base.BaseFunctionalTest):
         self.key = None
         self.reuse = True
         self.destroy = False
+
+        # FIXME workaroud AttributeError: 'NoneType' object has no attribute 'result_supports_subtests'
+        # for subtests in combination with pdb (bug before late 3.7)
+        self._outcome = case._Outcome()
 
     def _checkTags(self, proxy, resource, prefix, component):
         tag1 = "_ENV"
@@ -94,11 +67,3 @@ class BaseFunctionalTest(base.BaseFunctionalTest):
 
     def tearDown(self):
         super().tearDown()
-
-    def cleanup(self):
-        """ cleanup is called even if setup fails """
-        if self.key is not None and self.destroy:
-            # schedule deletion
-            pending_days=7
-            self.user_cloud.kmsv1.schedule_delete_key(self.key, pending_days=pending_days)
- 
