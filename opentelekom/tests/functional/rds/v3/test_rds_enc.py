@@ -30,14 +30,14 @@ class TestDB(base.BaseFunctionalTest):
     def setUp(self):
         super().setUp()
 
-        self.prefix = "rbe-sdktest-rds3"
+        self.prefix = self.test_suite_prefix + "-rds3"
 
         self.vpcFixture = self.useFixture(fixture_vpc.VpcFixture(self.user_cloud))
         self.cmkFixture = self.useFixture(fixture_kms.KmsFixture(self.user_cloud))
         self.rdsFixture = self.useFixture(fixture_rds.RdsFixture(self.user_cloud))
 
         self.vpcFixture.createTestSubnet1(self.prefix)
-        self.cmkFixture.aquireTestKey("rbe-sdktest")
+        self.cmkFixture.aquireTestKey(self.test_suite_prefix)
         self.rdsFixture.createTestSecGroupRds1(self.prefix)
         self.rdsFixture.createTestRds1(self.prefix, self.vpcFixture.sn1,
             self.rdsFixture.rds1_sg, self.cmkFixture.key)
@@ -58,6 +58,6 @@ class TestDB(base.BaseFunctionalTest):
         super().tearDown()
         
         # check non-existence
-        instances = self.user_cloud.rdsv3.dbs()
-        myClusters = list(filter(lambda inst: inst.name.startswith(self.prefix+ "-db1"), instances))
-        self.assertEqual(len(myClusters), 0)
+        #instances = self.user_cloud.rdsv3.dbs()
+        #myClusters = list(filter(lambda inst: inst.name.startswith(self.prefix+ "-db1"), instances))
+        #self.assertEqual(len(myClusters), 0)

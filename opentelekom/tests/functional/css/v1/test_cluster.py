@@ -32,34 +32,46 @@ class TestCluster(base.BaseFunctionalTest):
     def setUp(self):
         super().setUp()
 
-        self.prefix = "rbe-sdktest-css"
+        self.prefix = self.test_suite_prefix + "-css"
 
         self.vpcFixture = self.useFixture(fixture_vpc.VpcFixture(self.user_cloud))
         self.cmkFixture = self.useFixture(fixture_kms.KmsFixture(self.user_cloud))
         self.cssFixture = self.useFixture(fixture_css.CssFixture(self.user_cloud))
 
         self.vpcFixture.createTestSubnet1(self.prefix)
-        self.cmkFixture.aquireTestKey("rbe-sdktest")
+        self.cmkFixture.aquireTestKey(self.test_suite_key)
         self.cssFixture.createTestSecGroupCss(self.prefix)
         self.cssFixture.createTestCss(prefix=self.prefix, subnet=self.vpcFixture.sn1,
             secgroup=self.cssFixture.sg_css, key=self.cmkFixture.key)
 
-    def test_cluster_found_update(self):
+    def check_list(self):
         clusters = list(self.user_cloud.css.clusters())
         self.assertGreater(len(clusters), 0)
         cluster_found = list(filter(lambda x: x['name'] == self.prefix +"-css", clusters ))
         self.assertEqual(len(cluster_found), 1)
-    
+
+    def check_get(self):
+        found_cluster = self.user_cloud.cluster.get_cluster(self.cssFixture.css.id)
+        self.assertTrue(found_cluster)
+        self.assertEqual(found_cluster.id, self.cssFixture.css.id)
+        self.assertEqual(found_cluster.name, self.cssFixture.css.name)
+
+    def check_find(self):
+        found_again = self.user_cloud.cluster.find_cluster(self.cssFixture.css.name)
+        self.assertTrue(found_again)
+        self.assertEqual(found_again.id, self.cssFixture.css.id)
+
+    def test_cluster_found_update(self):
+        with self.subTest(msg="Stage 1: Test CSS cluster list"):
+            self.check_list()
+        with self.subTest(msg="Stage 2: Test CSS cluster get"):
+            self.check_get()
+        with self.subTest(msg="Stage 3: Test CSS cluster find"):
+            self.check_find()
         # TODO: restart, expand tests
 
-        found_cluster = self.user_cloud.cluster.get_cluster(self.css.id)
-        self.assertFalse(found_cluster is not None)
-        self.assertEqual(found_cluster.id, self.css.id)
-        self.assertEqual(found_cluster.name, self.css.name)
 
-        found_again = self.user_cloud.cluster.find_cluster(self.css.name)
-        self.assertTrue(found_again)
-        self.assertEqual(found_again.id, self.css.id)
+
 
 
     def tearDown(self):

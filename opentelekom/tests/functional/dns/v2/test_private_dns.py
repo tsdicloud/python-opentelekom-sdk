@@ -20,12 +20,12 @@ from opentelekom.tests.functional.vpc.v1 import fixture_vpc
 from opentelekom.dns.dns_service import DnsService
 
 
-class TestCustomeMasterKey(base.BaseFunctionalTest):
+class TestPrivateDns(base.BaseFunctionalTest):
 
     def setUp(self):
         super().setUp()
 
-        self.prefix = "rbe-sdktest"
+        self.prefix = self.test_suite_prefix + "-dns"
         self.zonename = "sdktest."
 
         self.vpcFixture = self.useFixture(fixture_vpc.VpcFixture(self.user_cloud))

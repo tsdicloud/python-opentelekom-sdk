@@ -25,7 +25,7 @@ class TestVpc(base.BaseFunctionalTest):
     def setUp(self):
         super().setUp()
 
-        self.prefix = "rbe-sdktest-vpc"
+        self.prefix = self.test_suite_prefix + "-vpc"
 
         self.vpcFixture = self.useFixture(fixture_vpc.VpcFixture(self.user_cloud))
         self.vpcFixture.createTestVpc(self.prefix)    

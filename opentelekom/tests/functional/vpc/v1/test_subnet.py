@@ -26,7 +26,7 @@ class TestSubnet(base.BaseFunctionalTest):
     def setUp(self):
         super().setUp()
 
-        self.prefix = "rbe-sdktest-subnet"
+        self.prefix = self.test_suite_prefix + "-subnet"
 
         self.vpcFixture = self.useFixture(fixture_vpc.VpcFixture(self.user_cloud))
         self.vpcFixture.createTestSubnet1(self.prefix)

@@ -26,7 +26,7 @@ class TestQueue(base.BaseFunctionalTest):
         super().setUp()
         self.user_cloud.add_service(DmsService("dmsv1"))
 
-        self.prefix = "rbe-sdktest-css"
+        self.prefix = self.test_suite_prefix + "-dms"
 
         self.dmsFixture = self.useFixture(fixture_dms.DmsFixture(self.user_cloud))
         self.dmsFixture.createTestQueue(self.prefix)

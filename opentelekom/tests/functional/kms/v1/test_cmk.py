@@ -25,22 +25,22 @@ class TestCustomeMasterKey(base.BaseFunctionalTest):
     def setUp(self):
         super().setUp()
 
-        self.prefix = "rbe-sdktest"
+        self.prefix = self.test_suite_prefix + "-kms"
 
         self.cmkFixture = self.useFixture(fixture_kms.KmsFixture(self.user_cloud))
         self.cmkFixture.aquireTestKey(self.prefix)    
 
-
-
-    def test_cmk_found_enable_disable(self):
+    def check_get(self):
         cmk = self.user_cloud.kmsv1.get_key(self.cmkFixture.key)
         self.assertFalse(cmk is None)
         self.assertEqual(cmk.key_id, self.cmkFixture.key.key_id)
 
+    def check_find(self):
         cmk = self.user_cloud.kmsv1.find_key(self.cmkFixture.key.name)
         self.assertFalse(cmk is None)
         self.assertEqual(cmk.key_id, self.cmkFixture.key.key_id)
 
+    def check_enable_disable(self):
         cmk_state1 = self.user_cloud.kmsv1.disable_key(self.cmkFixture.key.key_id)
         self.assertFalse(cmk_state1 is None)
         self.assertEqual(cmk_state1.id, self.cmkFixture.key.key_id)
@@ -51,19 +51,33 @@ class TestCustomeMasterKey(base.BaseFunctionalTest):
         self.assertEqual(cmk_state2.key_id, self.cmkFixture.key.key_id)
         self.assertTrue(cmk_state2.key_state == 2)
 
+    def check_delete_undelete(self):
+        # schedule deletion
+        pending_days=14
+        cmk_del1 = self.user_cloud.kmsv1.schedule_delete_key(self.cmkFixture.key, pending_days=pending_days)
+        self.assertFalse(cmk_del1 is None)
+        self.assertEqual(cmk_del1.id, self.cmkFixture.key.key_id)
+        self.assertTrue(cmk_del1.key_state == 4)
+        
+        # TODO: check pending days
+        # self.assertTrue(cmk_del1.pending_days == pending_days)
+        # cancel deletion
+        cmk_del2 = self.user_cloud.kmsv1.cancel_delete_key(self.cmkFixture.key)
+        self.assertFalse(cmk_del2 is None)
+        self.assertEqual(cmk_del2.key_id, self.cmkFixture.key.key_id)
+        self.assertTrue(cmk_del2.key_state < 4)
+
+
+    def test_cmk(self):
+        with self.subTest(msg="Stage 1: Test key get"):
+            self.check_get()
+        with self.subTest(msg="Stage 2: Test key find"):
+            self.check_find()
+        with self.subTest(msg="Stage 3: Test key enable/disable"):
+            self.check_enable_disable()
+        with self.subTest(msg="Stage 4: Test key delete/undelete"):
+            self.check_delete_undelete()
+        
+
     def tearDown(self):
-        if self.cmkFixture.key is not None and self.cmkFixture.destroy:
-            # schedule deletion
-            pending_days=14
-            cmk_del1 = self.user_cloud.kmsv1.schedule_delete_key(self.cmkFixture.key, pending_days=pending_days)
-            self.assertFalse(cmk_del1 is None)
-            self.assertEqual(cmk_del1.id, self.cmkFixture.key.key_id)
-            self.assertTrue(cmk_del1.key_state == 4)
-            # TODO: check pending days
-            # self.assertTrue(cmk_del1.pending_days == pending_days)
-            # cancel deletion
-            cmk_del2 = self.user_cloud.kmsv1.cancel_delete_key(self.cmkFixture.key)
-            self.assertFalse(cmk_del2 is None)
-            self.assertEqual(cmk_del2.key_id, self.cmkFixture.key.key_id)
-            self.assertTrue(cmk_del2.key_state < 4)
         super().tearDown()

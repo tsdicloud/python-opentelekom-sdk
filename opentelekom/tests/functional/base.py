@@ -11,6 +11,8 @@
 # under the License.
 
 import re
+import os
+
 from six.moves import reduce
 
 from opentelekom import connection as otc_connection
@@ -39,9 +41,16 @@ class BaseFunctionalTest(base.BaseFunctionalTest):
         self.reuse = True
         self.destroy = False
 
+        self.test_suite_prefix = os.environ.get('OTC_TEST_SUITE', 'sdktest')
+        self.test_key = os.environ.get('OTC_TEST_KEY', self.test_suite_prefix)
+        self.test_ssh_key = os.environ.get('OTC_TEST_SSH_KEY', self.test_suite_prefix)
+
         # FIXME workaroud AttributeError: 'NoneType' object has no attribute 'result_supports_subtests'
         # for subtests in combination with pdb (bug before late 3.7)
         self._outcome = case._Outcome()
+
+
+
 
     def _checkTags(self, proxy, resource, prefix, component):
         tag1 = "_ENV"

@@ -26,7 +26,7 @@ class TestNatGateway(base.BaseFunctionalTest):
     def setUp(self):
         super().setUp()
 
-        self.prefix = "rbe-sdktest-nat"
+        self.prefix = self.test_suite_prefix + "-nat"
 
         self.vpcFixture = self.useFixture(fixture_vpc.VpcFixture(self.user_cloud))
         self.vpcFixture.createTestSubnet1(self.prefix)
@@ -36,7 +36,6 @@ class TestNatGateway(base.BaseFunctionalTest):
 
         self.natFixture = self.useFixture(fixture_nat.NatFixture(self.user_cloud))
         self.natFixture.addNatGateway(self.prefix, subnet=self.vpcFixture.sn1, eip=eip)
-        #import pdb; pdb.set_trace()
 
     def test_nat_found(self):
         natfound = self.user_cloud.nat.find_nat(self.natFixture.nat.name)
