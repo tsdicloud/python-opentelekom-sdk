@@ -100,7 +100,7 @@ class Proxy(otc_proxy.OtcProxy):
 
         :returns: ``None``
         """
-        self._delete(_gw.Service, natgw, ignore_missing=ignore_missing)
+        return self._delete(_gw.Service, natgw, ignore_missing=ignore_missing)
 
     def create_snat_rule(self, **attrs):
         """Create a snat rule for natting gateway from attributes
@@ -181,7 +181,7 @@ class Proxy(otc_proxy.OtcProxy):
 
         :returns: ``None``
         """
-        self._delete(_snat.Rule, rule, ignore_missing=ignore_missing)
+        return self._delete(_snat.Rule, rule, ignore_missing=ignore_missing)
 
 
     def wait_for_status(self, res, status='ACTIVE', failures=None,
