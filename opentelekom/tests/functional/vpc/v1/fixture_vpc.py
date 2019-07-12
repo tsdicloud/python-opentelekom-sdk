@@ -17,7 +17,6 @@ from openstack import exceptions
 from opentelekom.tests.functional import base
 
 from opentelekom.vpc.vpc_service import VpcService
-from opentelekom.vpc.vpc2_service import Vpc2Service
 
 class VpcFixture(fixtures.Fixture):
     """ This is a fixture mixin for vpc features """
@@ -27,8 +26,8 @@ class VpcFixture(fixtures.Fixture):
 
     def setUp(self):
         super().setUp()
-        self.user_cloud.add_service( VpcService("vpc", aliases=['vpc'] ))
-        self.user_cloud.add_service( Vpc2Service("vpc2.0", aliases=['vpc2'] ))
+        self.user_cloud.add_service( VpcService("vpc", aliases=['vpc1'] ))      # v1 service registration
+        #self.user_cloud.add_service( VpcService("vpc2.0", aliases=['vpc2'] ))  # v2 service registration
 
     def createTestVpc(self, prefix):
         """ Fixture to add a test vpc and subnet1 """ 
@@ -47,14 +46,13 @@ class VpcFixture(fixtures.Fixture):
             vpc=self.vpc,
             name=prefix + "-sn1",
             cidr="10.248.0.0/21",
-            gateway_ip="10.248.0.1"
-            )
+            gateway_ip="10.248.0.1")
         self.addCleanup(self._cleanupTestSubnet1)
         self.user_cloud.vpc.wait_for_status(self.sn1)
 
     def addTestSubnet2(self, prefix):
         """ Fixture to add another subnet2 """ 
-        self.sn1 = self.user_cloud.vpc.create_subnet(
+        self.sn2 = self.user_cloud.vpc.create_subnet(
             vpc=self.vpc,
             name=prefix + "-sn2",
             cidr="10.248.32.0/21",

@@ -14,9 +14,9 @@ import six
 import fixtures
 
 from openstack import exceptions
-from openstack.network.v2 import security_group, security_group_rule
+from openstack import utils
 
-from opentelekom.tests.functional import base
+from openstack.network.v2 import security_group, security_group_rule
 
 from opentelekom.css import css_service
 
@@ -49,11 +49,14 @@ class CssFixture(fixtures.Fixture):
 
     def _cleanupTestSecGroupCss(self):
         if hasattr(self, 'sg_css') and self.sg_css:
-            #rules = self.user_cloud.network.security_group_rules(security_group_id=self.sg_css.id)    
-            #for rule in rules:
-            #    self.user_cloud.network.delete_security_group_rule(rule)
-            # looks like OpenTelekom removes rules automatically with group
-            self.user_cloud.network.delete_security_group(self.sg_css.id)
+            for count in utils.iterate_timeout(
+                timeout=500,
+                message="Timeout deleting rds security group",
+                wait=10):
+                try:
+                    return self.user_cloud.network.delete_security_group(self.sg_css.id)
+                except exceptions.ConflictException:
+                    pass
 
     def createTestCss(self, prefix, subnet, secgroup, key):
         vpc_id=subnet.vpc_id

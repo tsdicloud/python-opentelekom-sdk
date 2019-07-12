@@ -37,7 +37,7 @@ class TestCce2(base.BaseFunctionalTest):
 
         self.vpcFixture.createTestSubnet1(self.prefix)
         self.cce2Fixture.createTestCluster(prefix=self.prefix, subnet=self.vpcFixture.sn1)
-        self.cce2Fixture.createSomeNodes1(prefix=self.prefix, ssh_key=self.test_ssh_key)
+        self.cce2Fixture.createSomeNodes1(prefix=self.prefix, ssh_key=self.test_suite_ssh_key)
 
 
 

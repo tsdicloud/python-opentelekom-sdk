@@ -42,8 +42,8 @@ class BaseFunctionalTest(base.BaseFunctionalTest):
         self.destroy = False
 
         self.test_suite_prefix = os.environ.get('OTC_TEST_SUITE', 'sdktest')
-        self.test_key = os.environ.get('OTC_TEST_KEY', self.test_suite_prefix)
-        self.test_ssh_key = os.environ.get('OTC_TEST_SSH_KEY', self.test_suite_prefix)
+        self.test_suite_key = os.environ.get('OTC_TEST_KEY', self.test_suite_prefix)
+        self.test_suite_ssh_key = os.environ.get('OTC_TEST_SSH_KEY', self.test_suite_prefix)
 
         # FIXME workaroud AttributeError: 'NoneType' object has no attribute 'result_supports_subtests'
         # for subtests in combination with pdb (bug before late 3.7)

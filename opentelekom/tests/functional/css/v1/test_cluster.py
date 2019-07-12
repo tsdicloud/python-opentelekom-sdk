@@ -18,7 +18,6 @@ from openstack.network.v2 import security_group_rule
 
 
 from opentelekom.tests.functional import base
-from opentelekom.tests.functional import base
 from opentelekom.tests.functional.vpc.v1 import fixture_vpc
 from opentelekom.tests.functional.kms.v1 import fixture_kms
 from opentelekom.tests.functional.css.v1 import fixture_css
@@ -51,17 +50,17 @@ class TestCluster(base.BaseFunctionalTest):
         self.assertEqual(len(cluster_found), 1)
 
     def check_get(self):
-        found_cluster = self.user_cloud.cluster.get_cluster(self.cssFixture.css.id)
+        found_cluster = self.user_cloud.css.get_cluster(self.cssFixture.css.id)
         self.assertTrue(found_cluster)
         self.assertEqual(found_cluster.id, self.cssFixture.css.id)
         self.assertEqual(found_cluster.name, self.cssFixture.css.name)
 
     def check_find(self):
-        found_again = self.user_cloud.cluster.find_cluster(self.cssFixture.css.name)
+        found_again = self.user_cloud.css.find_cluster(self.cssFixture.css.name)
         self.assertTrue(found_again)
         self.assertEqual(found_again.id, self.cssFixture.css.id)
 
-    def test_cluster_found_update(self):
+    def test_lifecycle(self):
         with self.subTest(msg="Stage 1: Test CSS cluster list"):
             self.check_list()
         with self.subTest(msg="Stage 2: Test CSS cluster get"):
@@ -69,10 +68,6 @@ class TestCluster(base.BaseFunctionalTest):
         with self.subTest(msg="Stage 3: Test CSS cluster find"):
             self.check_find()
         # TODO: restart, expand tests
-
-
-
-
 
     def tearDown(self):
         super().tearDown()

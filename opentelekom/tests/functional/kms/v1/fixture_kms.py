@@ -47,10 +47,10 @@ class KmsFixture(fixtures.Fixture):
         # search for matching names and extract the highest serial version number
         cmk_last_serial = six.moves.reduce(max, map(lambda vers: int(_vexp.match(vers.name).group(1)), cmks), 0)
         cmk_last_serial += 1
-        return "{prefix}-{serial:06d}".format(serial=cmk_last_serial, prefix=self.CMK_PREFIX)
+        return "{prefix}-{serial:06d}".format(serial=cmk_last_serial, prefix=name)
 
     def aquireTestKey(self, prefix):
-        name = prefix +"-key"
+        name = prefix + "-key"
         key = None
         if self.reuse:
             # try to reuse key in case of no lifecycle test

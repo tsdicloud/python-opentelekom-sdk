@@ -13,6 +13,7 @@
 import six
 
 from openstack import exceptions
+from openstack import utils
 
 from opentelekom.tests.functional import base
 from opentelekom.tests.functional.kms.v1 import fixture_kms
@@ -20,7 +21,7 @@ from opentelekom.tests.functional.kms.v1 import fixture_kms
 from opentelekom.kms.kms_service import KmsService
 
 
-class TestCustomeMasterKey(base.BaseFunctionalTest):
+class TestCustomerMasterKey(base.BaseFunctionalTest):
 
     def setUp(self):
         super().setUp()
@@ -28,7 +29,7 @@ class TestCustomeMasterKey(base.BaseFunctionalTest):
         self.prefix = self.test_suite_prefix + "-kms"
 
         self.cmkFixture = self.useFixture(fixture_kms.KmsFixture(self.user_cloud))
-        self.cmkFixture.aquireTestKey(self.prefix)    
+        self.cmkFixture.aquireTestKey(self.test_suite_key)    
 
     def check_get(self):
         cmk = self.user_cloud.kmsv1.get_key(self.cmkFixture.key)

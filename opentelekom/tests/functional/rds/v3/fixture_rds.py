@@ -12,8 +12,11 @@
 
 import six
 import fixtures
+import time
 
 from openstack import exceptions
+from openstack import utils
+
 from openstack.network.v2 import security_group, security_group_rule
 
 from opentelekom.tests.functional import base
@@ -32,7 +35,7 @@ class RdsFixture(fixtures.Fixture):
 
     def createTestSecGroupRds1(self, prefix):
         """ Fixture for a security group """ 
-        self.rds1_sg = self.user_cloud.network.create_security_group(name=prefix+"-rds1-sg",
+        self.rds1_sg = self.user_cloud.network.create_security_group(name=prefix+"-sg",
             description="Security group for rds1 fixture")
         self.user_cloud.network.create_security_group_rule(
             direction="ingress", ethertype="IPv4",
@@ -43,6 +46,7 @@ class RdsFixture(fixtures.Fixture):
     def _deleteSecGroup(self, id_or_name):
         secgroup = self.user_cloud.network.find_security_group(id_or_name)
         if secgroup is not None:
+            
             rules = self.user_cloud.network.security_group_rules(security_group_id=secgroup.id)    
             for rule in rules:
                 self.user_cloud.network.delete_security_group_rule(rule)
@@ -50,7 +54,16 @@ class RdsFixture(fixtures.Fixture):
 
     def _cleanupTestSecGroupRds1(self):
         if hasattr(self, 'rds1_sg') and self.rds1_sg is not None:
-            self._deleteSecGroup(self.rds1_sg)    
+            # we have to wait until cluster really disappears from network
+            for count in utils.iterate_timeout(
+                timeout=500,
+                message="Timeout deleting rds security group",
+                wait=10):
+                try:
+                    return self.user_cloud.network.delete_security_group(self.rds1_sg)
+                except exceptions.ConflictException:
+                    pass
+
 
     def createTestRds1(self, prefix, subnet, secgroup, key):
         vpc_id=subnet.vpc_id
@@ -74,11 +87,14 @@ class RdsFixture(fixtures.Fixture):
             password="Test@12345678")
             # region=self.user_cloud.session.get_project_id(),
         self.addCleanup(self._cleanupTestRds1)
-        self.user_cloud.rdsv3.wait_for_status(self.rds1)
+        self.user_cloud.rdsv3.wait_for_db_job(self.rds1)
+        #self.user_cloud.rdsv3.wait_for_status(self.rds1)
 
 
     def _cleanupTestRds1(self):
         if hasattr(self, 'rds1') and self.rds1 is not None:
-            self.user_cloud.rdsv3.delete_db(self.rds1)
-            self.user_cloud.rdsv3.wait_for_delete(self.rds1)
+            rds_job = self.user_cloud.rdsv3.delete_db(self.rds1)
+            self.user_cloud.rdsv3.wait_for_delete(rds_job)
+            #self.user_cloud.rdsv3.wait_for_db_job(rds_job)
+            # add some additional idle time because the network required some time to register that the resource is really deleted
 

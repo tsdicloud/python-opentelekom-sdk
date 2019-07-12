@@ -14,6 +14,7 @@ import six
 import time
 
 from openstack import exceptions
+
 from openstack.network.v2 import security_group
 from openstack.network.v2 import security_group_rule
 
@@ -37,7 +38,7 @@ class TestDB(base.BaseFunctionalTest):
         self.rdsFixture = self.useFixture(fixture_rds.RdsFixture(self.user_cloud))
 
         self.vpcFixture.createTestSubnet1(self.prefix)
-        self.cmkFixture.aquireTestKey(self.test_suite_prefix)
+        self.cmkFixture.aquireTestKey(self.test_suite_key)
         self.rdsFixture.createTestSecGroupRds1(self.prefix)
         self.rdsFixture.createTestRds1(self.prefix, self.vpcFixture.sn1,
             self.rdsFixture.rds1_sg, self.cmkFixture.key)
@@ -48,7 +49,7 @@ class TestDB(base.BaseFunctionalTest):
         self.assertTrue( isinstance(db_found, _db.DB) )
         self.assertEqual(db_found.id, self.rdsFixture.rds1.id)
 
-        db_found2 = self.user_cloud.rdsv3.find_db(self.prefix+ "-db1")
+        db_found2 = self.user_cloud.rdsv3.find_db(self.prefix + "-db1")
         self.assertFalse(db_found2 is None)
         self.assertTrue( isinstance(db_found2, _db.DB) )
         self.assertEqual(db_found2.id, self.rdsFixture.rds1.id)
