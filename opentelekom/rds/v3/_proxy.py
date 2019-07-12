@@ -10,6 +10,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import time
+
 from opentelekom import otc_proxy
 from opentelekom.rds.v3 import datastore as _datastore
 from opentelekom.rds.v3 import flavor as _flavor
@@ -131,6 +133,21 @@ class Proxy(otc_proxy.OtcProxy):
         """
         return self._delete(_db.DB, db, ignore_missing=ignore_missing)
 
+    def wait_for_db_job(self, res_or_job_id, status='Completed', failures=None, interval=15, wait=1000):
+        """ Wait for the DB job to Complete or Fail 
+        :param res_or_job_id: either a job:id or a resource with a job_id attribute set """
+        if hasattr(res_or_job_id, 'job_id'):
+            job_id = res_or_job_id.job_id
+        else:
+            job_id = res_or_job_id
+        if job_id:
+            jobres = self._get_resource(_db.DBJob, job_id)
+            failures = ['Failed'] if failures is None else failures
+            return resource.wait_for_status(
+                self, jobres, status, failures, interval, wait)
+        else:
+            return res_or_job_id
+
 
     def wait_for_status(self, res, status='ACTIVE', failures=None,
                         interval=15, wait=1000):
@@ -171,4 +188,5 @@ class Proxy(otc_proxy.OtcProxy):
         :raises: :class:`~openstack.exceptions.ResourceTimeout` if transition
                  to delete failed to occur in the specified seconds.
         """
-        return resource.wait_for_delete(self, res, interval, wait)
+        resource.wait_for_delete(self, res, interval, wait)
+

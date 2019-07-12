@@ -18,7 +18,6 @@ from openstack import exceptions
 
 from opentelekom import otc_resource
 
-
 class DB(otc_resource.OtcResource, otc_resource.TagMixin):
     resources_key = "instances"
     resource_key = "instance" # top structure 
@@ -104,24 +103,72 @@ class DB(otc_resource.OtcResource, otc_resource.TagMixin):
     #: nodes: list of nodes belonging ti the DB cluster (primary/standby)
     nodes = resource.Body("nodes", type=list)
     #: related_instance: associated DB instances
-    related_instance = resource.Body("related_inastance", type=list)
+    related_instance = resource.Body("related_instance", type=list)
     #: time_zone: timezone the nodes are running with
     time_zone = resource.Body("time_zone")
     #: replication_mode: mode for (standby) replication 
     #: MySQL: (asyn, semisync), PostgreSQL: (async, sync), SQLserver:(sync)
     replication_mode = resource.Body("replication_mode")
+    #: job_id: id of a running job
+    #: Could be used to wait for job finishing
+    job_id = resource.Body("job_id")
+
+    def _translate_response(self, response, has_body=None, error_message=None):
+        """ Extend the default behaviour to add job_id from response top-level if available """
+        resp = response.json()    
+        if 'job_id' in resp:
+            self._body['job_id'] = resp['job_id']
+            self._body.clean()
+        super()._translate_response(response, has_body=has_body, error_message=error_message)
 
     def fetch(self, session, requires_id=True,
               base_path=None, error_message=None, **params):
-        # RDS3 has no dedicated GET Method, so we have to use the list query with id
+        """ RDS3 has no dedicated GET Method, so we have to use the list query with id """
         result = list(DB.list(session, base_path=base_path, id=self.id))
         if result:
             return result[0]
         else:
             raise exceptions.ResourceNotFound(details="RDS DB not found.", http_status=404)
 
+
     def create(self, session, prepend_key=False, base_path=None):
-        # disable resource_key prepend, and fake an initial status for wait
+        # disable resource_key prepend as default setting, and fake an initial status for wait
         res = super().create(session, prepend_key, base_path)
         res.status = "BUILD"
         return res
+
+
+class DBJob(otc_resource.OtcResource):
+    """ Job status for RDS v3 operations """
+    resource_key="job"
+
+     # capabilities
+    allow_create = False
+    allow_commit = False # !no update
+    allow_list = False
+    allow_fetch = True
+    allow_delete = False
+
+    _query_mapping = resource.QueryParameters("id")
+
+    #--- get/fetch fields
+    #: name: Name of the task
+    name = resource.Body('name')
+    #: name: Name of the task
+    name = resource.Body('name')
+    #: status: Task status
+    #: possible values are: Running, Completed, Failed
+    status = resource.Body('status')
+    #: created: timestamp of job creation, "yyyy-mm-ddThh:mm:ssZ" format
+    created = resource.Body('created')
+    #: process: progess indication
+    process = resource.Body('process')
+    #: instance: details about the targetted instances
+    instance = resource.Body('instance', type=dict)
+    #: entities: details about the job, depending on job type
+    entities = resource.Body('entities', type=dict)
+
+    def fetch(self, session, requires_id=False,
+              base_path=None, error_message=None, **params):
+        base_path = "/jobs?id=%s" % self.id
+        return super().fetch(session, requires_id, base_path, error_message, **params)
