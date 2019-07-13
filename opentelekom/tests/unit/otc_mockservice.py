@@ -25,25 +25,26 @@ class OtcMockResponse(requests.Response):
     """ This is a simple data structure that describes a url calling pattern and a simple response e.g. srecorded
     from functional tests """
 
-    default_headers = CaseInsensitiveDict( data={"Accept-Ranges": "bytes",
-                       "Connection": "keep-alive",
-                       "Content-Type": "application/json",
-                       "Date": "Thu, 23 May 2019 15:11:11 GMT",
-                       "Server": "Web Server",
-                       "Strict-Transport-Security": "max-age=31536000; includeSubdomains;",
-                       "Vary": "Accept-Charset, Accept-Encoding, Accept-Language, Accept",
-                       "X-Content-Type-Options": "nosniff",
-                       "X-Download-Options": "noopen",
-                       "X-Frame-Options": "SAMEORIGIN",
-                       "X-XSS-Protection": "1; mode=block;"
-                       })
+    default_headers = CaseInsensitiveDict(data={"Accept-Ranges": "bytes",
+                                                "Connection": "keep-alive",
+                                                "Content-Type": "application/json",
+                                                "Date": "Thu, 23 May 2019 15:11:11 GMT",
+                                                "Server": "Web Server",
+                                                "Strict-Transport-Security": "max-age=31536000; includeSubdomains;",
+                                                "Vary": "Accept-Charset, Accept-Encoding, Accept-Language, Accept",
+                                                "X-Content-Type-Options": "nosniff",
+                                                "X-Download-Options": "noopen",
+                                                "X-Frame-Options": "SAMEORIGIN",
+                                                "X-XSS-Protection": "1; mode=block;"
+                                                })
 
-    def __init__(self, method, url_match, path, json=None, text=None, status_code=200, headers=None, **kwargs):
+    def __init__(self, method, url_match, path, json=None, text=None, status_code=200, headers=None, max_calls=-1, **kwargs):
         """ A very sensitive implementation to imitate most of the 
         implicit behavior the openstacksdk session deends on """
         self.method = method
         self.url_match = url_match
         self.path = path
+        self.max_calls = max_calls
         self.headers = self.default_headers
         self.history = []
         if headers:
@@ -65,56 +66,67 @@ class OtcMockResponse(requests.Response):
         self.reason = None
         self.num_called = 0
 
+
 class OtcMockService:
     """ The baseclass for all mocked OTC responses.
     If authentication is needed, the baseclass mocks all the required keystone responses.
     Otherwise, it mocks the matching response for this test """
 
-    @staticmethod
-    def _matchURL(method, url, response):
+    @classmethod
+    def _selectResponse(cls, method, url, mock_responses, **kwargs):
         u = urlparse(url)
-        if (response.method == method) and (response.url_match in u.netloc) and (response.path == u.path):
-            return True
+        mockFound = False
+        # find a mocked candidate
+        for pos, response in enumerate(mock_responses):
+            if (response.method == method) and response.url_match in u.netloc and (response.path == u.path):
+                mockFound = True
+                if (response.max_calls==-1) or (response.num_called < response.max_calls):
+                    mock_responses[pos].num_called += 1
+                    # only use candidate if call limit is not reached
+                    req = requests.Request(method, url)
+                    response.request = req.prepare()
+                    response.history = []
+                    response.elapsed = datetime.timedelta(milliseconds=300)
+                    return response
+
+        if mockFound:
+            raise AssertionError(
+                method + " " + u.netloc + " " + u.path + " more often called than expected")
         else:
-            return False
+            return None
 
     @classmethod
     def request(cls, method, url, params=None, data=None, headers=None, **kwargs):
-        matchURL = lambda x: cls._matchURL(method=method, url=url, response=x) 
-
-        try:
-            keystone_response = next(filter(matchURL, cls.keystone_responses))
-            keystone_response.num_called += 1
+        keystone_response = cls._selectResponse(
+            method, url, cls.keystone_responses)
+        if keystone_response:
             return keystone_response
-        except StopIteration:
-            pass
-        
-        try:
-            response = next(filter(matchURL, cls.responses))
-            response.num_called += 1
-            req = requests.Request(method, url)
-            response.request = req.prepare()
-            response.history = []
-            response.elapsed = datetime.timedelta(milliseconds=300)
-            return response
-        except StopIteration:
-            u = urlparse(url)
-            raise AssertionError(method + " " + u.netloc + " " + u.path + " not mocked!")
+        else:
+            response = cls._selectResponse(method, url, cls.responses)
+            if response:
+                return response
+            else:
+                u = urlparse(url)
+                raise AssertionError(
+                    method + " " + u.netloc + " " + u.path + " not mocked!")
+
 
     @classmethod
     def assertAuthCalled(cls):
         for resp in cls.keystone_responses:
-            if resp.num_called<1:
-                raise AssertionError('Keystone authentication NOT properly called!')
+            if resp.num_called < 1:
+                raise AssertionError(
+                    'Keystone authentication NOT properly called!')
 
     @classmethod
     def assertServicesCalled(cls):
         missingCalls = ""
         for resp in cls.responses:
-            if resp.num_called<1:
+            if resp.num_called < 1:
                 missingCalls += resp.method + " " + resp.url_match + " " + resp.path + "\n"
-        if len(missingCalls)>0:
-            raise AssertionError('Not all expected endpoints called! Missing:\n' + missingCalls)
+        if len(missingCalls) > 0:
+            raise AssertionError(
+                'Not all expected endpoints called! Missing:\n' + missingCalls)
 
     responses = []
     keystone_responses = [
