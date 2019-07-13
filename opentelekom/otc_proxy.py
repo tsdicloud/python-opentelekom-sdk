@@ -83,16 +83,20 @@ class OtcProxy(proxy.Proxy):
 
         end_status = _normalize_status(status)
 
+        observed = None
+        orig_list = list(list_func())
+
         def _pending(res):
-            res_status = _normalize_status(getattr(res, attribute)) 
+            res_status = _normalize_status(getattr(res, attribute))
             return (res_status != end_status) and (res_status not in failures)
-        
+
+        def _disappeared(res):
+            res_status = _normalize_status(getattr(res, attribute)) 
+            return (res_status == 'deleted')
+
         def _failed(res):
             res_status = _normalize_status(getattr(res, attribute)) 
-            return (res_status == 'deleted') or (res_status in failures)
-
-        observed = None
-        orig_list = list_func()
+            return (res_status in failures)
 
         for count in utils.iterate_timeout(
             timeout=wait,
@@ -101,18 +105,32 @@ class OtcProxy(proxy.Proxy):
             wait=interval):
 
             # use the early-read initial resource state list for the first iteration
-            if not observed:
+            if observed is None:
                 observed = orig_list
             else:
-                observed = list_func()
-            
+                observed = list(list_func())
+
+            # check for interfering deletes from somewhere else with suddenly
+            # disapearing resources
+            try:
+                if ( len(orig_list) == len(observed) ):   
+                    next(filter(_disappeared, observed))
+                    raise exceptions.ResourceFailure(
+                        "Some resources unexpectedly disappeared during wait.")                
+            except StopIteration:
+                pass
+
             # get states
             # always check all resources in case of late errors and
             # externally triggered state changes
-            pending = filter(_pending, observed)
-            try:
-                next(pending) # test for non-empty pending set
-            except StopIteration:
+            pending = list(filter(_pending, observed))
+            if pending:
+                # test for non-empty pending set, and also log the
+                # pending ones
+                pending_states = _pretty_states(pending, attribute) 
+                log.debug("[%s] still waiting for state %s.", 
+                    pending_states, end_status)
+            else:
                 errors = list(filter(_failed, observed))
                 if errors:
                     raise exceptions.ResourceFailure(
@@ -120,9 +138,6 @@ class OtcProxy(proxy.Proxy):
                             name=_pretty_states(errors, attribute)))
                 else:
                     return observed
-
-            log.debug("[%s] still waiting for state %s.", 
-                _pretty_states(pending, attribute), end_status)
 
         return observed
 
