@@ -74,6 +74,10 @@ class TestCce2(base.BaseFunctionalTest):
         self.assertTrue(found_cluster)
         self.assertEqual(found_cluster.id, self.cce2Fixture.cce2.id)
 
+    def check_certificates(self):
+        found_certs = self.user_cloud.cce2.get_cluster_certs(self.cce2Fixture.cce2)
+        self.assertTrue(found_certs)
+    
     # def check_update(self):
 
     def test_cluster(self):
@@ -87,7 +91,8 @@ class TestCce2(base.BaseFunctionalTest):
             self.check_get()
         with self.subTest(msg="Stage 3: Test Cce cluster find"):
             self.check_find()
-
+        with self.subTest(msg="Stage 4: Test Cce get certificates"):
+            self.check_certificates()
 
     def tearDown(self):
         super().tearDown()

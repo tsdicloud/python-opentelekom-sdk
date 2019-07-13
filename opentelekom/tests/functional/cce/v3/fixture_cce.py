@@ -79,14 +79,14 @@ class Cce2Fixture(fixtures.Fixture):
                 }],
                 'count': 3
             })
-        self.addCleanup(self._cleanupSomeNodes1)
+        #self.addCleanup(self._cleanupSomeNodes1)
         # the ids are not in the response to the create call,
         # so we need to query afterwards
-        import pdb; pdb.set_trace()
         self.user_cloud.cce2.wait_for_status_cluster_nodes(self.cce2)
 
 
     def _cleanupSomeNodes1(self):
+        '''The cleanup is only used if explicitly registered. The cluster deletes nodes on deletion by default'''
         if hasattr(self, 'cce2') and self.cce2:
             self.user_cloud.cce2.delete_cluster_nodes(self.cce2)
             self.user_cloud.cce2.wait_for_delete_cluster_nodes(self.cce2)
