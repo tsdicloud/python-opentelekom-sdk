@@ -52,6 +52,7 @@ def connect_from_ansible(module):
                 interface=module.params['interface'],
                 # Endpoint override workarounds: add here
                 # rdsv3_endpoint_override="https://rds.eu-de.otc.t-systems.com/v3/%(project_id)s"
+                ccev2.0_endpoint_override="https://cce.eu-de.otc.t-systems.com/api/v3/projects/%(project_id)s",
             )
         return cloud_conn
 
