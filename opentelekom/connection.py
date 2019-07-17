@@ -40,20 +40,23 @@ def connect_from_ansible(module):
                 module.fail_json(msg=fail_message.format(param='interface'))
             cloud_conn = Connection(**cloud_config)
         else:
-            cloud_conn = Connection(
-                cloud=cloud_config,
-                auth_type=module.params['auth_type'],
-                auth=module.params['auth'],
-                region_name=module.params['region_name'],
-                verify=module.params.get('verify', module.params.get('validate_certs')),
-                cacert=module.params['cacert'],
-                key=module.params.get('key', module.params.get('client_key')),
-                api_timeout=module.params['api_timeout'],
-                interface=module.params['interface'],
+            auth_dict = {
+                'cloud': cloud_config,
+                'auth_type': module.params['auth_type'],
+                'auth': module.params['auth'],
+                'region_name': module.params['region_name'],
+                'verify': module.params.get('verify', module.params.get('validate_certs')),
+                'cacert': module.params['cacert'],
+                'key': module.params.get('key', module.params.get('client_key')),
+                'api_timeout': module.params['api_timeout'],
+                'interface': module.params['interface'],
                 # Endpoint override workarounds: add here
-                # rdsv3_endpoint_override="https://rds.eu-de.otc.t-systems.com/v3/%(project_id)s"
-                ccev2.0_endpoint_override="https://cce.eu-de.otc.t-systems.com/api/v3/projects/%(project_id)s",
-            )
+                #'rdsv3_endpoint_override': "https://rds.eu-de.otc.t-systems.com/v3/%(project_id)s"
+                'ccev2.0_endpoint_override': "https://cce.eu-de.otc.t-systems.com/api/v3/projects/%(project_id)s",
+            }    
+
+            cloud_conn = Connection(**auth_dict)
+
         return cloud_conn
 
     except exceptions.SDKException as e:
