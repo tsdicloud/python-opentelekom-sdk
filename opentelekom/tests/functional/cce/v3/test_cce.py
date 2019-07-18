@@ -32,8 +32,13 @@ class TestCce2(base.BaseFunctionalTest):
 
         self.prefix = self.test_suite_prefix + "-cce"
 
+
         self.vpcFixture  = self.useFixture(fixture_vpc.VpcFixture(self.user_cloud))
         self.cce2Fixture = self.useFixture(fixture_cce.Cce2Fixture(self.user_cloud))
+
+        # assert that empty (cluster) list works. OTC returns a strange null result
+        # list instead of an empty array 
+        found_cluster = self.user_cloud.cce2.find_cluster("bla")
 
         self.vpcFixture.createTestSubnet1(self.prefix)
         self.cce2Fixture.createTestCluster(prefix=self.prefix, subnet=self.vpcFixture.sn1)
@@ -46,6 +51,7 @@ class TestCce2(base.BaseFunctionalTest):
         self.assertGreater(len(clusters), 0)
         cluster_found = list(filter(lambda x: x['name'] == self.prefix +"-cce2", clusters ))
         self.assertEqual(len(cluster_found), 1)
+
 
     def check_name_id(self):
         '''TODO Move to unit tests
@@ -74,11 +80,16 @@ class TestCce2(base.BaseFunctionalTest):
         self.assertTrue(found_cluster)
         self.assertEqual(found_cluster.id, self.cce2Fixture.cce2.id)
 
+
+    def check_not_found(self):
+        found_cluster = self.user_cloud.cce2.find_cluster("bla")
+        self.assertFalse(found_cluster)
+
+
     def check_certificates(self):
         found_certs = self.user_cloud.cce2.get_cluster_certs(self.cce2Fixture.cce2)
         self.assertTrue(found_certs)
-    
-    # def check_update(self):
+
 
     def test_cluster(self):
         '''We want to use cleanup, so we have to chunk the functional test not by test_ methods
@@ -89,8 +100,10 @@ class TestCce2(base.BaseFunctionalTest):
             self.check_list()
         with self.subTest(msg="Stage 2: Test Cce cluster get"):
             self.check_get()
-        with self.subTest(msg="Stage 3: Test Cce cluster find"):
+        with self.subTest(msg="Stage 3.1: Test Cce cluster find"):
             self.check_find()
+        with self.subTest(msg="Stage 3.2: Test Cce cluster not found"):
+            self.check_not_found()
         with self.subTest(msg="Stage 4: Test Cce get certificates"):
             self.check_certificates()
 
