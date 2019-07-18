@@ -21,32 +21,51 @@ class HostNetworkSpec(resource.Resource):
     # Properties
     #: ID of the high-speed network that is used to create a bare metal node.
     highway_subnet = resource.Body('highwaySubnet')
-    #: Security group.
-    security_group = resource.Body('SecurityGroup')
     #: ID of the subnet that is used to create a node.
     subnet = resource.Body('subnet')
     #: ID of the VPC that is used to create a node.
     vpc = resource.Body('vpc')
 
+class ContainerNetworkSpec(resource.Resource):
+    # Properties
+    #: internal kube network type; one of overlay_l2, 
+    #: underlay_ipvlan, vpc-router
+    mode = resource.Body('mode')
+    #: IP range of internal addresses in the cluster as CIDR
+    cidr = resource.Body('cidr')
+
+class AuthenticationProxySpec(resource.Resource):
+    #: ca certificate of the authenticating proxy, base64 encoded
+    ca = resource.Body('ca')
+
+class AuthenticationSpec(resource.Resource):
+    # Properties
+    #: type of authentication for the new cluster:
+    #: values: x509 authenticating_proxy
+    mode = resource.Body('mode')
+    #: values for the authentication proxy
+    authenticating_proxy = resource.Body('authenticatingProxy', type=AuthenticationProxySpec)
+
+
 class ClusterSpec(resource.Resource):
-    #: Authentication
-    authentication = resource.Body('authentication', type=dict)
-    #: Billing mode of the cluster. Currently, only pay-per-use is supported.
-    billing = resource.Body('billingMode', type=int)
-    #: Container network parameters.
-    container_network = resource.Body('containerNetwork', type=dict)
-    #: Cluster description.
-    description = resource.Body('description')
-    #: Extended parameters.
-    extended_param = resource.Body('extendParam', type=dict)
-    #: Cluster flavors.
-    flavor = resource.Body('flavor')
-    #: Node network parameters.
-    host_network = resource.Body('hostNetwork', type=HostNetworkSpec)
     #: Cluster type.
     type = resource.Body('type')
+    #: Cluster flavors.
+    flavor = resource.Body('flavor')
     #: Cluster version ['v1.9.2-r2', 'v1.11.3-r1'].
     version = resource.Body('version')
+    #: Cluster description.
+    description = resource.Body('description')
+    #: Node network parameters.
+    host_network = resource.Body('hostNetwork', type=HostNetworkSpec)
+    #: Container network parameters.
+    container_network = resource.Body('containerNetwork', type=ContainerNetworkSpec)
+    #: Billing mode of the cluster. Currently, only pay-per-use is supported.
+    billing = resource.Body('billingMode', type=int)
+    #: Extended parameters.
+    extended_param = resource.Body('extendParam', type=dict)
+    # pure return values
+    authentication = resource.Body('authentication', type=AuthenticationSpec)
 
 
 class StatusSpec(resource.Resource):
