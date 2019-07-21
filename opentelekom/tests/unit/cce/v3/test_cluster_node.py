@@ -75,7 +75,7 @@ class TestClusterNode(base.BaseFunctionalTest):
         ]
 
 
-    @mock.patch.object(requests.Session, "request", side_effect=MockNodesActiveList.request)
+    @mock.patch.object(requests.Session, "request", side_effect=MockNodesActiveList().request)
     def test_wait_status_ids(self, mock):
         nodes=self.user_cloud.cce2.wait_for_status_nodes(self.cluster_id, self.node_ids, interval=1, wait=1000)
         self.assertEqual(len(nodes), 4)
@@ -87,6 +87,20 @@ class TestClusterNode(base.BaseFunctionalTest):
         self.assertEqual(nodes[1].status, "Active")
         self.assertEqual(nodes[2].status, "Active")
         self.assertEqual(nodes[3].status, "Active")
+
+    @mock.patch.object(requests.Session, "request", side_effect=MockNodesActiveList().request)
+    def test_wait_status_nodes(self, mock):
+        nodes=self.user_cloud.cce2.wait_for_status_nodes(self.cluster_id, self.nodes, interval=1, wait=1000)
+        self.assertEqual(len(nodes), 4)
+        self.assertEqual(nodes[0].id, "65a87e5d-a3e9-11e9-92b3-0255ac101711")
+        self.assertEqual(nodes[1].id, "65a9727f-a3e9-11e9-92b3-0255ac101711")
+        self.assertEqual(nodes[2].id, "65a73294-a3e9-11e9-92b3-0255ac101711")
+        self.assertEqual(nodes[3].id, "65a87e6d-a3e9-11e9-92b3-0255ac101711")
+        self.assertEqual(nodes[0].status, "Active")
+        self.assertEqual(nodes[1].status, "Active")
+        self.assertEqual(nodes[2].status, "Active")
+        self.assertEqual(nodes[3].status, "Active")
+
 
     class MockNodesDeleteList(OtcMockService):
         responses = [
@@ -120,7 +134,7 @@ class TestClusterNode(base.BaseFunctionalTest):
                         ]})
         ]
 
-    @mock.patch.object(requests.Session, "request", side_effect=MockNodesDeleteList.request)
+    @mock.patch.object(requests.Session, "request", side_effect=MockNodesDeleteList().request)
     def test_wait_delete_ids(self, mock):
         nodes=self.user_cloud.cce2.wait_for_delete_nodes(self.cluster_id, self.node_ids, interval=1, wait=5)
         self.assertEqual(len(nodes), 1)
@@ -128,3 +142,9 @@ class TestClusterNode(base.BaseFunctionalTest):
         #self.assertEqual(nodes[1].id, "65a9737f-a3e9-11e9-92b3-0255ac101711")
         #self.assertEqual(nodes[2].id, "65a73594-a3e9-11e9-92b3-0255ac101711")
         #self.assertEqual(nodes[3].id, "65a87e6d-a3e9-11e9-92b3-0255ac101711")
+
+    @mock.patch.object(requests.Session, "request", side_effect=MockNodesDeleteList().request)
+    def test_wait_delete_nodes(self, mock):
+        nodes=self.user_cloud.cce2.wait_for_delete_nodes(self.cluster_id, self.nodes, interval=1, wait=5)
+        self.assertEqual(len(nodes), 1)
+        self.assertEqual(nodes[0].id, "65a87e5d-a3e9-11e9-92b3-0255ac101711")

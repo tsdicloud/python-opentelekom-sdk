@@ -14,6 +14,7 @@ import six
 import json as _json
 import datetime
 import requests
+import copy
 
 from requests.structures import CaseInsensitiveDict
 
@@ -72,8 +73,11 @@ class OtcMockService:
     If authentication is needed, the baseclass mocks all the required keystone responses.
     Otherwise, it mocks the matching response for this test """
 
-    @classmethod
-    def _selectResponse(cls, method, url, mock_responses, **kwargs):
+    def __init__(self, **params):
+        self._responses = self.responses.copy()
+        self._keystone_responses = self.keystone_responses.copy()
+
+    def _selectResponse(self, method, url, mock_responses, **kwargs):
         u = urlparse(url)
         mockFound = False
         # find a mocked candidate
@@ -84,6 +88,7 @@ class OtcMockService:
                     mock_responses[pos].num_called += 1
                     # only use candidate if call limit is not reached
                     req = requests.Request(method, url)
+                    response.url = url
                     response.request = req.prepare()
                     response.history = []
                     response.elapsed = datetime.timedelta(milliseconds=300)
@@ -95,33 +100,29 @@ class OtcMockService:
         else:
             return None
 
-    @classmethod
-    def request(cls, method, url, params=None, data=None, headers=None, **kwargs):
-        keystone_response = cls._selectResponse(
-            method, url, cls.keystone_responses)
+    def request(self, method, url, params=None, data=None, headers=None, **kwargs):
+        keystone_response = self._selectResponse(
+            method, url, self._keystone_responses)
         if keystone_response:
             return keystone_response
         else:
-            response = cls._selectResponse(method, url, cls.responses)
-            if response:
+            response = self._selectResponse(method, url, self._responses)
+            if response is not None:
                 return response
             else:
                 u = urlparse(url)
                 raise AssertionError(
                     method + " " + u.netloc + " " + u.path + " not mocked!")
 
-
-    @classmethod
-    def assertAuthCalled(cls):
-        for resp in cls.keystone_responses:
+    def assertAuthCalled(self):
+        for resp in self.keystone_responses:
             if resp.num_called < 1:
                 raise AssertionError(
                     'Keystone authentication NOT properly called!')
 
-    @classmethod
-    def assertServicesCalled(cls):
+    def assertServicesCalled(self):
         missingCalls = ""
-        for resp in cls.responses:
+        for resp in self.responses:
             if resp.num_called < 1:
                 missingCalls += resp.method + " " + resp.url_match + " " + resp.path + "\n"
         if len(missingCalls) > 0:

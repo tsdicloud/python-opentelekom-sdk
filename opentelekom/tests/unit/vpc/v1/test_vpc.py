@@ -48,7 +48,7 @@ class TestVpc(base.BaseFunctionalTest):
                         )
         ]
 
-    @mock.patch.object(requests.Session, "request", side_effect=MockVpcList.request)
+    @mock.patch.object(requests.Session, "request", side_effect=MockVpcList().request)
     def test_list_vpcs(self, mock):
          vpcs = list(self.user_cloud.vpc.vpcs())
          self.assertGreater(len(vpcs), 0)
@@ -76,7 +76,7 @@ class TestVpc(base.BaseFunctionalTest):
 
         ]
 
-    @mock.patch.object(requests.Session, "request", side_effect=MockVpcFind.request)
+    @mock.patch.object(requests.Session, "request", side_effect=MockVpcFind().request)
     def test_find_by_name(self, mock):
         #self.MockVpcFind.assertServicesCalled()
         vpcfound2 = self.user_cloud.vpc.find_vpc(self.prefix + "-vpc")
@@ -93,7 +93,7 @@ class TestVpc(base.BaseFunctionalTest):
                         json={"vpc":{"id":"7f4d8a07-df6c-4c86-919f-4fa201463d65","name":"rbe-sdktest-vpc-vpc","cidr":"10.248.0.0/16","status":"OK","routes":[],"enable_shared_snat": True,"enterprise_project_id":"0"}}),
         ]
 
-    @mock.patch.object(requests.Session, "request", side_effect=MockVpcUpdate.request)
+    @mock.patch.object(requests.Session, "request", side_effect=MockVpcUpdate().request)
     def test_update(self, mock):
         vpc = self.user_cloud.vpc.update_vpc(self.vpcFixture.vpc.id, enable_shared_snat=True)
         self.assertTrue(vpc)

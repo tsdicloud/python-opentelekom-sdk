@@ -56,14 +56,14 @@ class TestOtcProxy(base.BaseFunctionalTest):
                         )
         ]
 
-    @mock.patch.object(requests.Session, "request", side_effect=MockNodesActiveList.request)
+    @mock.patch.object(requests.Session, "request", side_effect=MockNodesActiveList().request)
     def test_not_mocked_exception(self, mock):
         def _node_selector():
             return self.user_cloud.cce2.cluster_nodes("0aa55501-a3e8-11e9-9e49-000000000")
         with self.assertRaisesRegex(AssertionError, "not mocked!"):
             self.user_cloud.cce2.wait_for_status_all(_node_selector, status="Active", failures=None, interval=1, wait=20, attribute='status')
 
-    @mock.patch.object(requests.Session, "request", side_effect=MockNodesActiveList.request)
+    @mock.patch.object(requests.Session, "request", side_effect=MockNodesActiveList().request)
     def test_wait_all_ok(self, mock):
         def _node_selector():
             return self.user_cloud.cce2.cluster_nodes("0aa55501-a3e8-11e9-9e49-0255ac101611")
@@ -84,7 +84,7 @@ class TestOtcProxy(base.BaseFunctionalTest):
                         ),
         ]
 
-    @mock.patch.object(requests.Session, "request", side_effect=MockLimitedCall.request)
+    @mock.patch.object(requests.Session, "request", side_effect=MockLimitedCall().request)
     def test_called_too_often_exception(self, mock):
         def _node_selector():
             return self.user_cloud.cce2.cluster_nodes("0aa55501-a3e8-11e9-9e49-0255ac101611")
@@ -115,7 +115,7 @@ class TestOtcProxy(base.BaseFunctionalTest):
                         )
         ]
 
-    @mock.patch.object(requests.Session, "request", side_effect=MockNodesErrorList.request)
+    @mock.patch.object(requests.Session, "request", side_effect=MockNodesErrorList().request)
     def test_wait_all_error(self, mock):
         def _node_selector():
             return self.user_cloud.cce2.cluster_nodes("0aa55501-a3e8-11e9-9e49-0255ac101611")
@@ -147,7 +147,7 @@ class TestOtcProxy(base.BaseFunctionalTest):
                         )
         ]
 
-    @mock.patch.object(requests.Session, "request", side_effect=MockNodesDisappearList1.request)
+    @mock.patch.object(requests.Session, "request", side_effect=MockNodesDisappearList1().request)
     def test_wait_all_disappear(self, mock):
         def _node_selector():
             return self.user_cloud.cce2.cluster_nodes("0aa55501-a3e8-11e9-9e49-0255ac101611")

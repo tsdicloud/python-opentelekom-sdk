@@ -19,7 +19,7 @@ import requests
 
 from openstack import exceptions
 
-from opentelekom.vpc.vpc2_service import Vpc2Service
+#from opentelekom.vpc.vpc2_service import Vpc2Service
 from opentelekom.vpc.vpc_service import VpcService
 
 from opentelekom.tests.unit.otc_mockservice import OtcMockService, OtcMockResponse 
@@ -33,7 +33,7 @@ class VpcFixture(fixtures.Fixture):
     def setUp(self):
         super().setUp()
         self.user_cloud.add_service(VpcService("vpc", aliases=['vpc']))
-        self.user_cloud.add_service(Vpc2Service("vpc2.0", aliases=['vpc2']))
+        # self.user_cloud.add_service(Vpc2Service("vpc2.0", aliases=['vpc2']))
 
     class MockVpcCreate(OtcMockService):
         responses = [
@@ -46,7 +46,7 @@ class VpcFixture(fixtures.Fixture):
                         )
         ]
 
-    @mock.patch.object(requests.Session, "request", side_effect=MockVpcCreate.request)
+    @mock.patch.object(requests.Session, "request", side_effect=MockVpcCreate().request)
     def createTestVpc(self, prefix, mock):
         """ Fixture to add a test vpc and subnet1 """
         self.vpc = self.user_cloud.vpc.create_vpc(
@@ -88,7 +88,7 @@ class VpcFixture(fixtures.Fixture):
                         status_code=204)
             ]
 
-    @mock.patch.object(requests.Session, "request", side_effect=MockVpcDelete.request)
+    @mock.patch.object(requests.Session, "request", side_effect=MockVpcDelete().request)
     def _cleanupTestVpc(self, mock):
         if hasattr(self, 'vpc') and self.vpc is not None:
             self.user_cloud.vpc.delete_vpc(self.vpc)
