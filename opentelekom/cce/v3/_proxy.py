@@ -15,8 +15,6 @@ from openstack import exceptions
 
 from opentelekom import otc_proxy
 
-#from openstack.volumes. import 
-
 from opentelekom.cce.v3 import cluster as _cluster
 from opentelekom.cce.v3 import cluster_node as _cluster_node
 from opentelekom.cce.v3 import cluster_cert as _cluster_cert
@@ -269,8 +267,21 @@ class Proxy(otc_proxy.OtcProxy):
         def _all_nodes_selector():
             return self.cluster_nodes(cluster)
 
-        super().wait_for_status_all(_all_nodes_selector, status, 
+        return super().wait_for_status_all(_all_nodes_selector, status, 
             failures, interval, wait, attribute)
+
+    def wait_for_status_nodes(self, cluster, nodes, status="Active", failures=None, interval=15, wait=1200, attribute='status'):
+        node_ids = set(map( lambda node: node.id if isinstance(node, _cluster_node.ClusterNode) else node,
+            nodes ))
+        
+        def _nodes_by_id_selector():
+            return filter( lambda node: node.id in node_ids, 
+                self.cluster_nodes(cluster))
+
+        return super().wait_for_status_all(_nodes_by_id_selector, status, 
+            failures, interval, wait, attribute)
+
+
 
     def delete_cluster_nodes(self, cluster, ignore_missing=True):
         """Delete nodes selected by list_func from the cluster.
@@ -295,4 +306,14 @@ class Proxy(otc_proxy.OtcProxy):
         def _all_nodes_selector():
             return self.cluster_nodes(cluster)
 
-        super().wait_for_delete_all(_all_nodes_selector, interval, wait, attribute)
+        return super().wait_for_delete_all(_all_nodes_selector, interval, wait, attribute)
+
+    def wait_for_delete_nodes(self, cluster, nodes, interval=15, wait=1200, attribute='status'):
+        node_ids = set(map(
+            lambda node: node.id if isinstance(node, _cluster_node.ClusterNode) else node,
+            nodes ))            
+        def _nodes_by_id_selector():
+            return filter( lambda node: node.id in node_ids, 
+                self.cluster_nodes(cluster))
+
+        return super().wait_for_delete_all(_nodes_by_id_selector, interval, wait, attribute)
