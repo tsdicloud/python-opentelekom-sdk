@@ -156,7 +156,7 @@ class OtcProxy(proxy.Proxy):
         def _pending(res):
             return _normalize_status(getattr(res, attribute)) != 'deleted'
 
-        orig_nodes = list_func()
+        orig_nodes = list(list_func())
         observed = None
 
         for count in utils.iterate_timeout(
@@ -167,15 +167,17 @@ class OtcProxy(proxy.Proxy):
             if not observed:
                 observed = filter(_pending, orig_nodes)
             else:
-                observed = filter(_pending, list_func())
+                orig_nodes = list(list_func())
+                observed = filter(_pending, orig_nodes)
 
             # update observed list for all other iterations
             try:
                 next(observed) # test for non-empty pending set
             except StopIteration:
-                pass
+                return orig_nodes
 
         return orig_nodes
+
 
     #==== key/value tag handling support ====
     @staticmethod
