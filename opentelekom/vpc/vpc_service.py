@@ -14,13 +14,14 @@
 from keystoneauth1.exceptions.catalog import EndpointNotFound
 from openstack import service_description
 
-from opentelekom.vpc.v1 import _proxy
+from opentelekom.vpc.v1 import _proxy as _proxy1
+from opentelekom.vpc.v2 import _proxy as _proxy2
 
 class VpcService(service_description.ServiceDescription):
-    """A VPC service that eases use of openstack networking on Open Telekom Cloud"""
-
-    #valid_versions = [service_filter.ValidVersion('v1')]
+    """A VPC service that eases use of openstack networking on Open Telekom Cloud
+       Due to version check, the service can be registered for all supported version endpoints"""
 
     supported_versions = {
-        '1': _proxy.Proxy
+        '1': _proxy1.Proxy,
+        '2': _proxy2.Proxy,
     }

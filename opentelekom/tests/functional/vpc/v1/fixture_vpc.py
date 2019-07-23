@@ -19,15 +19,25 @@ from opentelekom.tests.functional import base
 from opentelekom.vpc.vpc_service import VpcService
 
 class VpcFixture(fixtures.Fixture):
-    """ This is a fixture mixin for vpc features """
-    
+    """ This is a fixture for vpc features 
+
+    FIXME: At the moment, version detection does not work properly,
+    which forces the need for the following config variable settings:
+    vpc2.0_api_version: 2
+    vpc_api_version: 1
+    """
+
+
     def __init__(self, user_cloud):
         self.user_cloud=user_cloud
+
 
     def setUp(self):
         super().setUp()
         self.user_cloud.add_service( VpcService("vpc", aliases=['vpc1'] ))      # v1 service registration
-        #self.user_cloud.add_service( VpcService("vpc2.0", aliases=['vpc2'] ))  # v2 service registration
+        self.user_cloud.add_service( VpcService("vpc2.0", aliases=['vpc2'] ))  # v2 service registration
+        #self.user_cloud.vpc2.get_endpoint_data()
+
 
     def createTestVpc(self, prefix):
         """ Fixture to add a test vpc and subnet1 """ 
