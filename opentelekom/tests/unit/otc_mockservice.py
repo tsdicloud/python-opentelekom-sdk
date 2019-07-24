@@ -42,6 +42,8 @@ class OtcMockResponse(requests.Response):
     def __init__(self, method, url_match, path, json=None, text=None, status_code=200, headers=None, max_calls=-1, **kwargs):
         """ A very sensitive implementation to imitate most of the 
         implicit behavior the openstacksdk session deends on """
+        super().__init__(**kwargs)
+        
         self.method = method
         self.url_match = url_match
         self.path = path
@@ -67,25 +69,28 @@ class OtcMockResponse(requests.Response):
         self.reason = None
         self.num_called = 0
 
-
 class OtcMockService:
     """ The baseclass for all mocked OTC responses.
     If authentication is needed, the baseclass mocks all the required keystone responses.
     Otherwise, it mocks the matching response for this test """
 
     def __init__(self, **params):
-        self._responses = self.responses.copy()
-        self._keystone_responses = self.keystone_responses.copy()
+        self._responses = [(r, 0) for r in self.responses]
+        self._keystone_responses = [(k, 0) for k in self.keystone_responses]
+
 
     def _selectResponse(self, method, url, mock_responses, **kwargs):
         u = urlparse(url)
         mockFound = False
         # find a mocked candidate
-        for pos, response in enumerate(mock_responses):
-            if (response.method == method) and response.url_match in u.netloc and (response.path == u.path):
+        for pos, restuple in enumerate(mock_responses):
+            response=restuple[0]
+            if (response.method == method and 
+                    response.url_match in u.netloc and 
+                    response.path == u.path):
                 mockFound = True
-                if (response.max_calls==-1) or (response.num_called < response.max_calls):
-                    mock_responses[pos].num_called += 1
+                if (response.max_calls==-1) or (restuple[1] < response.max_calls):
+                    mock_responses[pos] = (restuple[0], restuple[1]+1)
                     # only use candidate if call limit is not reached
                     req = requests.Request(method, url)
                     response.url = url
@@ -96,7 +101,7 @@ class OtcMockService:
 
         if mockFound:
             raise AssertionError(
-                method + " " + u.netloc + " " + u.path + " more often called than expected")
+                method + " " + u.netloc + " " + u.path + " more often called than expected " )
         else:
             return None
 
@@ -116,14 +121,14 @@ class OtcMockService:
 
     def assertAuthCalled(self):
         for resp in self.keystone_responses:
-            if resp.num_called < 1:
+            if resp[1] < 1:
                 raise AssertionError(
                     'Keystone authentication NOT properly called!')
 
     def assertServicesCalled(self):
         missingCalls = ""
         for resp in self.responses:
-            if resp.num_called < 1:
+            if resp[1] < 1:
                 missingCalls += resp.method + " " + resp.url_match + " " + resp.path + "\n"
         if len(missingCalls) > 0:
             raise AssertionError(
