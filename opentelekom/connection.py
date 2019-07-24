@@ -50,11 +50,7 @@ def connect_from_ansible(module):
                 'key': module.params.get('key', module.params.get('client_key')),
                 'api_timeout': module.params['api_timeout'],
                 'interface': module.params['interface'],
-                # Endpoint override workarounds: add here
-                #'rdsv3_endpoint_override': "https://rds.eu-de.otc.t-systems.com/v3/%(project_id)s"
-                'ccev2.0_endpoint_override': "https://cce.eu-de.otc.t-systems.com/api/v3/projects/%(project_id)s",
             }    
-
             cloud_conn = Connection(**auth_dict)
 
         return cloud_conn
@@ -64,10 +60,39 @@ def connect_from_ansible(module):
         module.fail_json(msg=str(e))
 
 
+def _patch_config(key, value, config, **params):
+    if config:
+        if key not in config.config:
+            config.config[key] = value
+    else:
+        if key not in params:
+            params[key] = value
 
 
 class Connection(connection.Connection):
-    """ This class is a temporary workaround for the add_service bug in 0.27.0 """
+    """ This class intercepts the openstack connection and 
+    injects some (still needed) workarounds for endpoints and version detection
+    for Open Telekom Cloud """
+
+
+    def __init__(self, config=None, **params):
+
+        # FIXME: Endpoint override workarounds: add here   
+        #_patch_config(config, 'rdsv3_endpoint_override',
+        #    "https://rds.eu-de.otc.t-systems.com/v3/%(project_id)s", **params)
+        _patch_config('ccev2.0_endpoint_override',
+            "https://cce.eu-de.otc.t-systems.com/api/v3/projects/%(project_id)s", 
+            config, **params)
+
+        # FIXME: Version detection workarounds: add here
+        _patch_config('vpc_api_version', "1", config, **params)
+        _patch_config('vpc2.0_api_version', "2", config, **params)
+        _patch_config('ccev2.0_api_version', "3", config, **params)
+
+
+        # hand over patched config to openstack.Connection
+        super().__init__(config=config, **params)
+
 
     # FIXME: remove if registration bug of (at least since) 0.27.0 is fixed
     # def add_service(self, service):
