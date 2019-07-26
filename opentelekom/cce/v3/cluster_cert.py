@@ -38,7 +38,7 @@ class UserListSpec(resource.Resource):
     # Properties
     name = resource.Body('name')
     #: Cluster information.
-    cluster = resource.Body('users', type=UserSpec)
+    user = resource.Body('user', type=UserSpec)
 
 class ContextSpec(resource.Resource):
     # Properties
