@@ -51,7 +51,7 @@ class ContextListSpec(resource.Resource):
     # Properties
     name = resource.Body('name')
     #: Context information.
-    contexts = resource.Body('contexts', type=ContextSpec)
+    contexts = resource.Body('context', type=ContextSpec)
 
 class ClusterCertificate(otc_resource.OtcResource):
     base_path = '/clusters/%(cluster_id)s/clustercert'
