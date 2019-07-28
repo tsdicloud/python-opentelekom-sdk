@@ -67,7 +67,7 @@ def _patch_config(prop, value, config, **params):
     else:
         if prop not in params:
             params[prop] = value
-
+    return params
 
 class Connection(connection.Connection):
     """ This class intercepts the openstack connection and 
@@ -80,14 +80,14 @@ class Connection(connection.Connection):
         # FIXME: Endpoint override workarounds: add here   
         #_patch_config(config, 'rdsv3_endpoint_override',
         #    "https://rds.eu-de.otc.t-systems.com/v3/%(project_id)s", **params)
-        _patch_config('ccev2.0_endpoint_override',
+        params = _patch_config('ccev2.0_endpoint_override',
             "https://cce.eu-de.otc.t-systems.com/api/v3/projects/%(project_id)s", 
             config, **params)
 
         # FIXME: Version detection workarounds: add here
-        _patch_config('vpc_api_version', "1", config, **params)
-        _patch_config('vpc2.0_api_version', "2", config, **params)
-        _patch_config('ccev2.0_api_version', "3", config, **params)
+        params = _patch_config('vpc_api_version', "1", config, **params)
+        params = _patch_config('vpc2.0_api_version', "2", config, **params)
+        params = _patch_config('ccev2.0_api_version', "3", config, **params)
 
 
         # hand over patched config to openstack.Connection
