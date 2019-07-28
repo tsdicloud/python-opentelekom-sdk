@@ -60,13 +60,13 @@ def connect_from_ansible(module):
         module.fail_json(msg=str(e))
 
 
-def _patch_config(key, value, config, **params):
+def _patch_config(prop, value, config, **params):
     if config:
-        if key not in config.config:
-            config.config[key] = value
+        if prop not in config.config:
+            config.config[prop] = value
     else:
-        if key not in params:
-            params[key] = value
+        if prop not in params:
+            params[prop] = value
 
 
 class Connection(connection.Connection):
