@@ -120,14 +120,14 @@ class OtcMockService:
                     method + " " + u.netloc + " " + u.path + " not mocked!")
 
     def assertAuthCalled(self):
-        for resp in self.keystone_responses:
+        for resp in self._keystone_responses:
             if resp[1] < 1:
                 raise AssertionError(
                     'Keystone authentication NOT properly called!')
 
     def assertServicesCalled(self):
         missingCalls = ""
-        for resp in self.responses:
+        for resp in self._responses:
             if resp[1] < 1:
                 missingCalls += resp.method + " " + resp.url_match + " " + resp.path + "\n"
         if len(missingCalls) > 0:
