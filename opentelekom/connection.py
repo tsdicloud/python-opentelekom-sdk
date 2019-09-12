@@ -84,11 +84,17 @@ class Connection(connection.Connection):
             "https://cce.eu-de.otc.t-systems.com/api/v3/projects/%(project_id)s", 
             config, **params)
 
+        # FIXME: vpc peerings require endpoint vpc2.0 WITHOUT project_id
+        # we introduce an artificial peervpc endpoint as workaround
+        params = _patch_config('peervpc_endpoint_override',
+            "https://vpc.eu-de.otc.t-systems.com/v2.0", 
+            config, **params)
+        params = _patch_config('peervpc_api_version', "2", config, **params)
+
         # FIXME: Version detection workarounds: add here
         params = _patch_config('vpc_api_version', "1", config, **params)
         params = _patch_config('vpc2.0_api_version', "2", config, **params)
         params = _patch_config('ccev2.0_api_version', "3", config, **params)
-
 
         # hand over patched config to openstack.Connection
         super().__init__(config=config, **params)
