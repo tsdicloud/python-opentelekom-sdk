@@ -9,4 +9,4 @@ $ sudo /usr/local/bin/pip3 tox
 . Run functional tests
 $ cd opentelekom/tests
 $ export PBR_VERSION=0.8.0
-$ tox -e functional3 
+$ tox -e functional
