@@ -87,8 +87,8 @@ class RdsFixture(fixtures.Fixture):
             password="Test@12345678")
             # region=self.user_cloud.session.get_project_id(),
         self.addCleanup(self._cleanupTestRds1)
-        self.user_cloud.rdsv3.wait_for_db_job(self.rds1)
-        #self.user_cloud.rdsv3.wait_for_status(self.rds1)
+        #self.user_cloud.rdsv3.wait_for_db_job(self.rds1)
+        self.user_cloud.rdsv3.wait_for_status(self.rds1)
 
 
     def _cleanupTestRds1(self):
