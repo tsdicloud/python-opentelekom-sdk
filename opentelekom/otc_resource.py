@@ -21,7 +21,7 @@ class OtcResource(resource.Resource):
     # ===== adaptions of standard methods for OTC
     def fetch(self, session, requires_id=True,
          base_path=None, error_message=None, **params):
-         """ Open Telekom CLoud sometimes throws an Bad Request exception.although a
+         """ Open Telekom Cloud sometimes throws an Bad Request exception.although a
              NotFound is required to make find or fetch working 
          """
          try:
@@ -75,9 +75,19 @@ class OtcResource(resource.Resource):
 
         super()._translate_response(response, has_body=has_body, error_message=emsg if isError else None)
 
-        #==== additional convenience functions =====
+        #==== additional convenience functions here =====
 
+#==== OpenTelekom Cloud usage of sub-resources to have cleaner APIs ====
+class OtcSubResource(resource.Resource):
+    """ This is an extension for Open Telekom Cloud so that sub-dicts could be defined with
+        resource fields for better documentation and type control """
 
+    def to_dict(self, body=True, headers=False, computed=True,
+                ignore_none=True, **params):
+        """ Just redefine behavior of to_dict to ignore Nones """
+        import pdb; pdb.set_trace()
+        super().to_dict(body=body, headers=headers, computed=computed,
+                ignore_none=ignore_none, **params)
 
 
 #==== OpenTelekom Cloud key/value extended tag handling ====
