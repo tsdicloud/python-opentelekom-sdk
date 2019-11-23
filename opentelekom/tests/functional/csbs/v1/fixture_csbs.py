@@ -34,7 +34,7 @@ class CsbsFixture(fixtures.Fixture):
 
     def setUp(self):
         super().setUp()
-        self.user_cloud.add_service(CsbsService("karbor", aliases=["csbs"]))
+        self.user_cloud.add_service(CsbsService("data-protect", aliases=["csbs"]))
 
 
     def createTestSecGroupCsbs1(self, prefix):
@@ -124,29 +124,30 @@ class CsbsFixture(fixtures.Fixture):
 
         serverResourceList = [ policy.ResourceSpec(
                 id = server.id,
-                os_type = "OS::Nova::Server"
+                type = "OS::Nova::Server",
+                name = server.name + ".bak"
             ) for server in servers ]
 
         self.policy = self.user_cloud.csbs.create_policy(
-            name=prefix+"policy1",
+            name=prefix+"-policy1",
             description="Opentelekom SDK CSBS test policy",
-            parameters=policy.ParameterSpec(),
+            parameters=policy.PolicyParametersSpec(),
             resources= serverResourceList,
-            scheduled_operations=policy.ScheduledOperationSpec(
+            scheduled_operations=[ policy.ScheduledOperationSpec(
                 enabled=True,
                 name=prefix+"scheduling1",
-                decription="Opentelekom SDK CSBS test schedule",
+                description="Opentelekom SDK CSBS test schedule",
                 operation_type="backup",
                 operation_definition = policy.OperationDefinitionSpec(
                     max_backups = "-1",
                     retention_duration_days = "1"
-                ),
+                    ),
                 trigger = policy.TriggerSpec( 
                     properties = policy.TriggerPropertiesSpec(
                         pattern = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\r\nEND:VEVENT\r \nEND:VCALENDAR\r\n"
-                ))
+                    ))
+                ) ]
             )
-        )
         self.addCleanup(self._cleanupTestPolicy)
 
 

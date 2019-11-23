@@ -15,7 +15,7 @@ import uuid
 from openstack import resource
 from opentelekom import otc_resource
 
-class ParametersSpec(otc_resource.OtcSubResource):
+class PolicyParametersSpec(otc_resource.OtcSubResource):
     """ At the moment an empty dict which must be given """
     # Properties
     #: common: Name of the sub dict for common params
@@ -27,7 +27,7 @@ class ResourceSpec(otc_resource.OtcSubResource):
     #: id: id of the resource, mandatory here.
     #: os_type: type of the resource, at the moment only
     #: OS::Nova::Server, mandatory
-    os_type = resource.Body("type")
+    type = resource.Body("type", default="OS::Nova::Server")
     #: name: name of the object in backup, mandatory
     name = resource.Body("name")
     #: extra_info: name,value pairs for future use
@@ -37,9 +37,9 @@ class ResourceSpec(otc_resource.OtcSubResource):
 class OperationDefinitionSpec(otc_resource.OtcSubResource):
     # Properties
     #: max_backup: number of backups to keep, -1 for no limit, charcters!
-    max_backups = resource.Body("max_backups")
+    max_backups = resource.Body("max_backups", type=int) # TODO: marked as string in docu!
     #: retention_duration_days: days to keep a backup, -1 for no limit, characters! 
-    retention_duration_days = resource.Body("retention_duration_days")
+    retention_duration_days = resource.Body("retention_duration_days", type=int) # TODO: marked as string in docu!
     #: permanent: "true" if backups should be permanently kept for retain, 
     #: bool as characters!
     permanent= resource.Body("permanent")
@@ -47,7 +47,7 @@ class OperationDefinitionSpec(otc_resource.OtcSubResource):
     #: plan_id: id of the backup plan
     plan_id = resource.Body("plan_id")
     #: provider_id: the backup provider used, at the moment only a fixed value
-    provider_id = resource.Body("provider_id", default="fc4d5750-22e7-4798-8a46-f48f62c4c1da")
+    provider_id = resource.Body("provider_id")
 
 
 class TriggerPropertiesSpec(otc_resource.OtcSubResource):
@@ -107,7 +107,7 @@ class Policy(otc_resource.OtcResource, otc_resource.TagMixin):
     #: description: some descriptive text up to 255 characters, no <, >
     description = resource.Body("description")
     #: parameters: set of general policy parameters
-    parameters = resource.Body("parameters", type=ParametersSpec)
+    parameters = resource.Body("parameters", type=PolicyParametersSpec)
     #: provider_id: preparation for multiple provider support, 
     #: at the moment fixed value default fc4d5750-22e7-4798-8a46-f48f62c4c1d
     provider_id = resource.Body("provider_id")
