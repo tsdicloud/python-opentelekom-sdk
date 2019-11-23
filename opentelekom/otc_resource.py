@@ -16,19 +16,41 @@ from openstack import resource
 from openstack import exceptions
 from openstack import utils
 
+
+
+def filter_none(d):
+
+    if isinstance(d, dict):
+        return { k: filter_none(v) for k, v in d.items() if v is not None }
+    elif isinstance(d, list):
+        return [ filter_none(elem) for elem in d ]
+    else:
+        return d
+
+
+
 class OtcResource(resource.Resource):
 
     # ===== adaptions of standard methods for OTC
     def fetch(self, session, requires_id=True,
-         base_path=None, error_message=None, **params):
-         """ Open Telekom Cloud sometimes throws an Bad Request exception.although a
-             NotFound is required to make find or fetch working 
-         """
-         try:
-             return super().fetch(session=session, requires_id=requires_id,
-                 base_path=base_path, error_message=error_message, **params)
-         except exceptions.BadRequestException as bad:
-             raise exceptions.ResourceNotFound(details=bad.details, http_status=404, request_id=bad.request_id)
+        base_path=None, error_message=None, **params):
+        """ Open Telekom Cloud sometimes throws an Bad Request exception.although a
+            NotFound is required to make find or fetch working 
+        """
+        try:
+            return super().fetch(session=session, requires_id=requires_id,
+                base_path=base_path, error_message=error_message, **params)
+        except exceptions.BadRequestException as bad:
+            raise exceptions.ResourceNotFound(details=bad.details, http_status=404, request_id=bad.request_id)
+
+
+    def _prepare_request(self, requires_id=None, prepend_key=False,
+        patch=False, base_path=None):
+        """ Enhance requets preparation by None value elimination """
+        request = super()._prepare_request(requires_id=requires_id, prepend_key=prepend_key,
+                         patch=patch, base_path=base_path)
+        request.body = filter_none(request.body)
+        return request
 
 
     def _translate_response(self, response, has_body=None, error_message=None):
@@ -77,6 +99,8 @@ class OtcResource(resource.Resource):
 
         #==== additional convenience functions here =====
 
+
+
 #==== OpenTelekom Cloud usage of sub-resources to have cleaner APIs ====
 class OtcSubResource(resource.Resource):
     """ This is an extension for Open Telekom Cloud so that sub-dicts could be defined with
@@ -85,8 +109,7 @@ class OtcSubResource(resource.Resource):
     def to_dict(self, body=True, headers=False, computed=True,
                 ignore_none=True, **params):
         """ Just redefine behavior of to_dict to ignore Nones """
-        import pdb; pdb.set_trace()
-        super().to_dict(body=body, headers=headers, computed=computed,
+        return super().to_dict(body=body, headers=headers, computed=computed,
                 ignore_none=ignore_none, **params)
 
 
