@@ -38,22 +38,18 @@ class TestPeering(base.BaseFunctionalTest):
         self.vpcFixture.createPeeringTestVpc(self.prefix)
         self.assertTrue(self.vpcFixture.peering_vpc)
         self.local_peering = self.user_cloud.peervpc.create_peering(name=self.prefix +"-local-peering",
-            request_vpc_info = {
-                "vpc_id": self.vpcFixture.vpc.id,
-                #"tenant_id": self.user_cloud.session.get_project_id()
-            },
-            accept_vpc_info = {
-                "vpc_id": self.vpcFixture.peering_vpc.id,
-                #"tenant_id": self.vpcFixture.foreign_cloud.session.get_project_id()
-            }
-            #request_vpc_info = VpcInfoSpec(
-            #    vpc_id=self.vpcFixture.vpc.id,
-            #    #project_id=self.user_cloud.session.get_project_id()
-            #),
-            #accept_vpc_info = VpcInfoSpec(
-            #    vpc_id=self.vpcFixture.peering_vpc.id,
-            #    #project_id=self.user_cloud.session.get_project_id()
-            #)
+            #request_vpc_info = {
+            #    "vpc_id": self.vpcFixture.vpc.id,
+            #},
+            #accept_vpc_info = {
+            #    "vpc_id": self.vpcFixture.peering_vpc.id,
+            #}
+            request_vpc_info = VpcInfoSpec(
+                vpc_id=self.vpcFixture.vpc.id,
+            ),
+            accept_vpc_info = VpcInfoSpec(
+                vpc_id=self.vpcFixture.peering_vpc.id,
+            )
         )
         self.addCleanup(self._cleanupLocalPeering)
 
@@ -71,17 +67,23 @@ class TestPeering(base.BaseFunctionalTest):
         self.vpcFixture.createForeignTestVpc(self.prefix)
         self.assertTrue(self.vpcFixture.foreign_vpc)
         self.remote_peering = self.user_cloud.peervpc.create_peering(name=self.prefix +"-remote-peering",
-            request_vpc_info = {
-                "vpc_id": self.vpcFixture.vpc.id,
-                #"tenant_id": self.user_cloud.session.get_project_id()
-            },
-            accept_vpc_info = {
-                "vpc_id": self.vpcFixture.foreign_vpc.id,
-                "tenant_id": self.vpcFixture.foreign_cloud.session.get_project_id()
-            }
+            request_vpc_info = VpcInfoSpec(
+                vpc_id=self.vpcFixture.vpc.id,
+            ),
+            accept_vpc_info = VpcInfoSpec(
+                vpc_id=self.vpcFixture.foreign_vpc.id,
+                tenant_id=self.vpcFixture.foreign_cloud.session.get_project_id()
+            )
+            #request_vpc_info = {
+            #    "vpc_id": self.vpcFixture.vpc.id,
+            #},
+            #accept_vpc_info = {
+            #    "vpc_id": self.vpcFixture.foreign_vpc.id,
+            #    "tenant_id": self.vpcFixture.foreign_cloud.session.get_project_id()
+            #}
         )
         self.addCleanup(self._cleanupRemotePeering)
-        self.vpcFixture.foreign_cloud.add_service( VpcService("peervpc") )  # v2.0 service registration with artificial, non-project endpoint
+        self.vpcFixture.foreign_cloud.add_service( VpcService("peervpc") )  # v2.0 service registration with artificial, non-project endpoint name
 
         # check peering status
         peering_status = self.user_cloud.peervpc.get_peering(self.remote_peering)
@@ -103,14 +105,21 @@ class TestPeering(base.BaseFunctionalTest):
         self.vpcFixture.createForeignTestVpc(self.prefix)
         self.assertTrue(self.vpcFixture.foreign_vpc)
         self.remote_peering = self.user_cloud.peervpc.create_peering(name=self.prefix +"-remote-peering",
-            request_vpc_info = {
-                "vpc_id": self.vpcFixture.vpc.id,
-                #"tenant_id": self.user_cloud.session.get_project_id()
-            },
-            accept_vpc_info = {
-                "vpc_id": self.vpcFixture.foreign_vpc.id,
-                "tenant_id": self.vpcFixture.foreign_cloud.session.get_project_id()
-            }
+            request_vpc_info = VpcInfoSpec(
+                vpc_id=self.vpcFixture.vpc.id,
+            ),
+            accept_vpc_info = VpcInfoSpec(
+                vpc_id=self.vpcFixture.foreign_vpc.id,
+                tenant_id=self.vpcFixture.foreign_cloud.session.get_project_id()
+            )
+            #request_vpc_info = {
+            #    "vpc_id": self.vpcFixture.vpc.id,
+            #    #"tenant_id": self.user_cloud.session.get_project_id()
+            #},
+            #accept_vpc_info = {
+            #    "vpc_id": self.vpcFixture.foreign_vpc.id,
+            #    "tenant_id": self.vpcFixture.foreign_cloud.session.get_project_id()
+            #}
         )
         self.addCleanup(self._cleanupRemotePeering)
         self.vpcFixture.foreign_cloud.add_service( VpcService("peervpc") )  # v2.0 service registration with artificial, non-project endpoint

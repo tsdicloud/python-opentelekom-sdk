@@ -17,13 +17,14 @@ from openstack import utils
 
 from opentelekom import otc_resource
 
-class VpcInfoSpec(resource.Resource):
+
+class VpcInfoSpec(otc_resource.OtcSubResource):
     #: vpc_id: the vpc id for one of the peering partners
     vpc_id = resource.Body("vpc_id")
     #---- get/list
     #: project_id: vpc endpoint is not dependent on project_id, so
     #: it has to be in the request body or get parameters
-    project_id = resource.Body("tenant_id")
+    tenant_id = resource.Body("tenant_id")
 
 
 class Peering(otc_resource.OtcResource, otc_resource.TagMixin):
