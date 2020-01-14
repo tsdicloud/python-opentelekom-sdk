@@ -117,7 +117,8 @@ class TestPeering(base.BaseFunctionalTest):
             vpc_id=self.vpcFixture.vpc.id
         )
         self.assertTrue(self.local_route.id)
-        import pdb; pdb.set_trace()
+
+
 
     def test_remote_reject_peering(self):
         # create the peering
