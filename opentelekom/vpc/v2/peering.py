@@ -52,6 +52,8 @@ class Peering(otc_resource.OtcResource, otc_resource.TagMixin):
     #---- create
     #: name: Name of the peering, not longer than 64 characters.
     name = resource.Body("name")
+    #: description: additional info on the peering
+    description = resource.Body("description")
     #: request_vpc_info: the requesting peering partner info 
     request_vpc_info = resource.Body("request_vpc_info", type=VpcInfoSpec)
     #: accept_vpc_info: the requesting peering partner info 
@@ -74,10 +76,12 @@ class Peering(otc_resource.OtcResource, otc_resource.TagMixin):
         session = self._get_session(session)
         return self._action(session, 'reject')
 
+
+
 class PeeringRoute(otc_resource.OtcResource):
     resources_key = "routes"
     resource_key = "route" # top structure is a dict for vpc
-    base_path = "/routes"
+    base_path = "/vpc/routes"
 
      # capabilities
     allow_create = True
@@ -96,18 +100,19 @@ class PeeringRoute(otc_resource.OtcResource):
 
     # Properties
     #---- create
-    #: vpc_id: the vpc id for one of the peering partners
-    vpc_id = resource.Body("vpc_id")
-    #: destination: Destination CIDR block
-    destination = resource.Body("destination")
-    #: nexthop: Addtional hop CIDR, optional
+    #: nexthop: id of the peering the route belongs to
     nexthop = resource.Body("nexthop")
     #: type: type of the route, only "peering" at the moment
     type = resource.Body("type")
+    #: destination: Destination CIDR block
+    destination = resource.Body("destination")
+    #: vpc_id: the vpc id the route should be added to
+    vpc_id = resource.Body("vpc_id")
     #---- get/list
-    #: project_id: vpc endpoint is not dependent on project_id, so
-    #: it has to be in the request body or get parameters
-    project_id = resource.Body("tenant_id")
+    #: project_id: vpc endpoint is dependent on project_id, so
+    #: it has to be in the request body or get parameters if not
+    #: inn your current project
+    tenant_id = resource.Body("tenant_id")
 
     def _prepare_request(self, requires_id=True, prepend_key=True,
                          base_path=None):

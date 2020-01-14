@@ -52,7 +52,16 @@ class TestPeering(base.BaseFunctionalTest):
             )
         )
         self.addCleanup(self._cleanupLocalPeering)
-
+        self.local_route = self.user_cloud.peervpc.create_route(nexthop=self.local_peering.id,
+            destination=self.vpcFixture.peering_vpc.cidr,
+            vpc_id=self.vpcFixture.vpc.id
+        )
+        self.assertTrue(self.local_route.id)
+        self.peer_route = self.user_cloud.peervpc.create_route(nexthop=self.local_peering.id,
+            destination=self.vpcFixture.vpc.cidr,
+            vpc_id=self.vpcFixture.peering_vpc.id
+        )
+        self.assertTrue(self.peer_route.id)
 
     def _cleanupLocalPeering(self):
         if hasattr(self, 'local_peering') and self.local_peering is not None:
@@ -98,7 +107,17 @@ class TestPeering(base.BaseFunctionalTest):
         self.user_cloud.peervpc.wait_for_status(self.remote_peering, "ACTIVE")
         self.vpcFixture.foreign_cloud.peervpc.wait_for_status(self.remote_peering, "ACTIVE")
 
-
+        self.peer_route = self.vpcFixture.foreign_cloud.peervpc.create_route(nexthop=self.remote_peering.id,
+            destination=self.vpcFixture.vpc.cidr,
+            vpc_id=self.vpcFixture.foreign_vpc.id
+        )
+        self.assertTrue(self.peer_route.id)
+        self.local_route = self.user_cloud.peervpc.create_route(nexthop=self.remote_peering.id,
+            destination=self.vpcFixture.foreign_vpc.cidr,
+            vpc_id=self.vpcFixture.vpc.id
+        )
+        self.assertTrue(self.local_route.id)
+        import pdb; pdb.set_trace()
 
     def test_remote_reject_peering(self):
         # create the peering
