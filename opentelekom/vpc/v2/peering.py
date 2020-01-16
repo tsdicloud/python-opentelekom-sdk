@@ -27,7 +27,7 @@ class VpcInfoSpec(otc_resource.OtcSubResource):
     tenant_id = resource.Body("tenant_id")
 
 
-class Peering(otc_resource.OtcResource, otc_resource.TagMixin):
+class Peering(otc_resource.OtcResource):
     """ FIXME: Note that peerings can only operate on the artificial endpoint peervpc """
 
     resources_key = "peerings"
@@ -44,8 +44,7 @@ class Peering(otc_resource.OtcResource, otc_resource.TagMixin):
     create_method = 'POST'
 
     _query_mapping = resource.QueryParameters(
-        "name", "status", "vpc_id", project_id="tenant_id",
-        **resource.TagMixin._tag_query_parameters
+        "name", "status", "vpc_id", "tenant_id"
     )
 
     # Properties
@@ -93,8 +92,7 @@ class PeeringRoute(otc_resource.OtcResource):
     create_method = 'POST'
 
     _query_mapping = resource.QueryParameters(
-        "destination", "type", "vpc_id", 
-        project_id="tenant_id",
+        "nexthop", "type", "destination","vpc_id", 
         **resource.TagMixin._tag_query_parameters
     )
 

@@ -14,40 +14,40 @@ from openstack import exceptions
 from openstack import resource
 from opentelekom import otc_resource
 
-class ClusterCertSpec(resource.Resource):
+class ClusterCertSpec(otc_resource.OtcSubResource):
     # Properties
     #: server: url endpoint the certificate is for
     server = resource.Body('server')
     #: certificate-authority-data: root certificate to trust
     ca_cert = resource.Body('certificate-authority-data')
 
-class ClusterCertListSpec(resource.Resource):
+class ClusterCertListSpec(otc_resource.OtcSubResource):
     # Properties
     name = resource.Body('name')
     #: Cluster information.
     cluster = resource.Body('cluster', type=ClusterCertSpec)
 
-class UserSpec(resource.Resource):
+class UserSpec(otc_resource.OtcSubResource):
     # Properties
     #: client certificate for the user
     cert = resource.Body('client-certificate-data')
     #: client private key for the user
     key = resource.Body('client-key-data')
 
-class UserListSpec(resource.Resource):
+class UserListSpec(otc_resource.OtcSubResource):
     # Properties
     name = resource.Body('name')
     #: Cluster information.
     user = resource.Body('user', type=UserSpec)
 
-class ContextSpec(resource.Resource):
+class ContextSpec(otc_resource.OtcSubResource):
     # Properties
     #: Cluster name
     cluster = resource.Body('cluster')
     #: User name
     user = resource.Body('users')
 
-class ContextListSpec(resource.Resource):
+class ContextListSpec(otc_resource.OtcSubResource):
     # Properties
     name = resource.Body('name')
     #: Context information.

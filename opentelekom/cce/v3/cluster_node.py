@@ -15,14 +15,14 @@ from openstack import resource
 from opentelekom import otc_resource
 from opentelekom.cce.v3 import cce_resource
 
-class VolumeSpec(resource.Resource):
+class VolumeSpec(otc_resource.OtcSubResource):
     # Properties
     #: Disk Size in GB.
     size = resource.Body('size', type=int)
     #: Volume type: [SATA, SAS, SSD].
     type = resource.Body('volumetype')
 
-class PublicIPSpec(resource.Resource):
+class PublicIPSpec(otc_resource.OtcSubResource):
     # Properties:
     #: List of IDs for the existing floating ips.
     ids = resource.Body('ids')
@@ -36,12 +36,12 @@ class PublicIPSpec(resource.Resource):
     #: }.
     floating_ip = resource.Body('eip', type=dict)
 
-class LoginSpec(resource.Resource):
+class LoginSpec(otc_resource.OtcSubResource):
     # Properties:
     #: SSH login key references
     sshKey = resource.Body('sshKey')
 
-class NodeSpec(resource.Resource):
+class NodeSpec(otc_resource.OtcSubResource):
     # Properties
     #: Flavor (mandatory)
     flavor = resource.Body('flavor')
@@ -63,7 +63,7 @@ class NodeSpec(resource.Resource):
     #: Number of nodes.
     count = resource.Body('count', type=int)
 
-class StatusSpec(resource.Resource):
+class StatusSpec(otc_resource.OtcSubResource):
     # Properties
     #: ID of the VM where the node resides in the ECS.
     instance_id = resource.Body('serverId')

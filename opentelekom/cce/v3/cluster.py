@@ -17,7 +17,7 @@ from opentelekom import otc_resource
 from opentelekom.cce.v3 import cce_resource
 
 
-class HostNetworkSpec(resource.Resource):
+class HostNetworkSpec(otc_resource.OtcSubResource):
     # Properties
     #: ID of the high-speed network that is used to create a bare metal node.
     highway_subnet = resource.Body('highwaySubnet')
@@ -26,7 +26,7 @@ class HostNetworkSpec(resource.Resource):
     #: ID of the VPC that is used to create a node.
     vpc = resource.Body('vpc')
 
-class ContainerNetworkSpec(resource.Resource):
+class ContainerNetworkSpec(otc_resource.OtcSubResource):
     # Properties
     #: internal kube network type; one of overlay_l2, 
     #: underlay_ipvlan, vpc-router
@@ -34,11 +34,11 @@ class ContainerNetworkSpec(resource.Resource):
     #: IP range of internal addresses in the cluster as CIDR
     cidr = resource.Body('cidr')
 
-class AuthenticationProxySpec(resource.Resource):
+class AuthenticationProxySpec(otc_resource.OtcSubResource):
     #: ca certificate of the authenticating proxy, base64 encoded
     ca = resource.Body('ca')
 
-class AuthenticationSpec(resource.Resource):
+class AuthenticationSpec(otc_resource.OtcSubResource):
     # Properties
     #: type of authentication for the new cluster:
     #: values: x509 authenticating_proxy
@@ -47,7 +47,7 @@ class AuthenticationSpec(resource.Resource):
     authenticating_proxy = resource.Body('authenticatingProxy', type=AuthenticationProxySpec)
 
 
-class ClusterSpec(resource.Resource):
+class ClusterSpec(otc_resource.OtcSubResource):
     #: Cluster type.
     type = resource.Body('type')
     #: Cluster flavors.
@@ -68,7 +68,7 @@ class ClusterSpec(resource.Resource):
     authentication = resource.Body('authentication', type=AuthenticationSpec)
 
 
-class StatusSpec(resource.Resource):
+class StatusSpec(otc_resource.OtcSubResource):
     # Properties
     #: Cluster status.
     status = resource.Body('phase')

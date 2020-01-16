@@ -20,7 +20,6 @@ from opentelekom.vpc.v2.peering import VpcInfoSpec
 
 from opentelekom.tests.functional.vpc.v1 import fixture_vpc
 
-
 class TestPeering(base.BaseFunctionalTest):
 
     def setUp(self):

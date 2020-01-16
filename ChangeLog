@@ -1,0 +1,92 @@
+CHANGES
+=======
+
+* Remove debugging breakpoint
+* Test peering routes
+* Add OtcSubResource, fix remote peering
+* Debug tests for CSBS policy
+* Debug tests for CSBS policy
+* Add Cloud Server Backup Service
+* Add tests
+* Remove faulty job handling from fixture
+* Add sub resource for more precise API specifications on OTC
+* Fix docu
+* Switch to 0.8.5 version
+* Add foreign cloud configuration for vpc peering tests
+* Add vpc peering (incl. artificial endpoint)
+
+0.8.4
+-----
+
+* Fix bug in assert
+* Exclude os\_sdk 0.31.2, broken security group rule
+* Fix connections with param sets instead of config
+* Fix naming conflict for parameter 'key'
+* Correct cluster description property name
+* Correct  UserListSpec
+* Correct unit testenv, add unit-debug env
+* Alter mock call counting approach to reuse mocks multiple times
+* Cleanup files from dms
+* Work around missing/wrong version information from OTC endpoint for VPC
+* Refactor mocking to reuse a mock multiple time
+* Improve handling of buld waiting for nodes
+* Correct return value when waiting for bulk delete
+* Add test for cce\_resource behavior on empty lists
+* Correct properties for CCE v2.0, API v3 cluster
+* Work around CCE v2 delivery null as empty list in items
+* Change authentication for connect from ansible
+* Work around faulty ccev2.0 endpoint\nSet ccev2.0\_endpoint\_override in connect\_from\_ansible
+* Add tests of proxy method wait\_for\_status\_all
+* Add Cloud Container Engine v2 (API v3) support
+* Fix wait\_for\_status\_all
+* Implement max\_call limit for responses\n-1 means no limit. If limit for a response is reached, the next matching resource which has not reached the limit is returned
+* Return resource on delete
+* Return resource on delete
+* Improve exception handling, add bulk waiting methods
+* Do housekeeping
+* Add OpenTelekom specific job handling (experimental)
+* Do project housekeeping
+* Fix security group deletion if cluster has not already disappeared from network and some refactorings
+* Add environment unit\_debug for unittests
+* Inntroduce test suite parammeters\nThe tests can now be run with paraneter set by ENVIRONMENT variables:\nOTC\_TEST\_SUITE=<prefix for all tests:default=sdktest>\nOTC\_TEST\_KEY=<master key prefix:default=OTC\_TEST\_SUITE>\nOTC\_TEST\_SSH\_KEY=<ssh key name for servers:default=OTC\_TEST\_SUITE>
+* Work around bug for subtests\nSet self.\_outcome to avoid 'NoneType' object has no attribute 'result\_supports\_subtests'. Fixed in late 3.7 version (which is not the default in a lot of linux distributions)
+* Removed workaround for openstacksdk add\_service bug from 0.27
+* Add tests for bulk waiting
+* Fix setting default dnsList\nA default dnsLIst is set if neither a dnsList nor a primary,secondary dns entry is given
+* Mock service calls to add proper unittesting
+* Add DNS service extended for OTC with private zone support
+
+0.8.3
+-----
+
+* Add compatibility for old and new Ansible versions <= 2.8, againagain
+* Add compatibility for old and new Ansible versions <= 2.8, again
+* Add compatibility for old and new Ansible versions <= 2.8
+* Fix wrongly used aliases for Ansible 2.8 changed behavior
+* Fix inconsistent cluster status value
+* Fix css cluster creation problem (a typo)
+* Fix delete of queue consumer group by queue\_id instead of queue object
+* Add fixture for css functional tests (still failing due to an API bug)
+* Cleanup some version inconsistencies for a clean minor release
+* Fix dms module, implement strange top-level list modelling for the service
+* Raise NotFound exception if rds instance is not found by id
+* Cleanup vpc
+* Refactor NAT test with reusable nat\_fixture and improves rule handling
+* Refactor RDS test for a reusable rds fixture and name\_or\_id find
+* Fix indent error
+* Remove debug breakpoints
+* Correct nat/snat\_rules handling for ansible modules
+* Fix key handling problems for ansible modules
+* Add find and update tests
+* Increment patch level for name\_or\_id support
+* Add test for find by name
+* Improve CustomerMasterKey to behave like other Openstack resources, e.g. reference by name\_or\_id
+* Fix name\_or\_id handling according to Openstack standard behavior
+* Add connection helper for Ansible modules
+* Improve Open Telekom Exception decoding
+* Add initial config for installation with setup.py
+* Add OTC key/value tag handling
+* Fix version information for installation
+* Clean up dirty code location
+* Create first reusable version of the Open Telekom Cloud SDK extension
+* Initial commit
